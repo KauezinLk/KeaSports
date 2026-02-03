@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Tem certeza que deseja sair?</h2>
+<a href="{% url 'logout' %}"><button>Deslogar</button></a>
+<a href="{% url 'index' %}"><button>Cancelar</button></a>
+{% endblock %}

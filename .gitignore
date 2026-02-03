@@ -1,0 +1,75 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtualenv
+.venv/
+venv/
+env/
+ENV/
+
+# Django
+*.log
+local_settings.py
+settings_local.py
+*/migrations/__pycache__/
+
+# PostgreSQL
+*.sql
+*.dump
+*.backup
+
+# Static / Media
+staticfiles/
+media/
+
+# Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE / Sistema
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Testes / Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Env / Secrets
+.env
+.env.*
+.env.local
+.env.production
+.env.dev
+
+# Chaves / Certificados
+*.pem
+*.key
+*.crt
+*.pfx
+
+# Serviços externos
+credentials.json
+service_account.json
+
+# Sessões / Cache
+sessions/
+cache/
+
+# Backups
+backup/
+backups/
+
+# Temporários
+*.tmp
+*.bak

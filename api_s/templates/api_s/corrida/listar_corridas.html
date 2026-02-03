@@ -1,0 +1,19 @@
+{% extends 'base.html' %} 
+{% block content %}
+<h1>Corridas disponíveis</h1>
+
+<ul>
+  <!-- A variável corrida começa sem valor. Quando o for inicia, ele pega cada objeto da lista corridas, um por vez, e coloca esse objeto dentro da variável corrida. Assim, em cada repetição do loop, corrida representa o objeto atual, e posso exibir seus dados, como corrida.nome. -->
+   
+  {% for corrida in corridas %}
+  <li>
+    <strong>{{ corrida.nome }}</strong> — {{ corrida.data }} — 
+    {{ corrida.local}}
+    <a href="{% url 'inscrever_corrida' corrida.id %}"
+    class="text-blue-600 hover:text-blue-800 underline" >- Inscrever-se</a>
+  </li>
+  {% empty %}
+  <li>Nenhuma corrida cadastrada.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

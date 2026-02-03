@@ -1,0 +1,110 @@
+--------------------------------- Itens de exibição do ADMIN.PY --------------------------------------------------
+    > list_display: define as colunas que aparecem na tabela do admin.
+
+    > list_filter: adiciona filtros laterais no painel admin, permitindo que você selecione, por exemplo:
+
+    Categoria: 15–19, 20–24, …
+    Sexo: M ou F
+
+---------------------------------- Papel do Inline vs ModelAdmin -------------------------------------------------
+
+    ModelAdmin (ex.: CorridaAdmin) representa um modelo principal que aparece na lista do admin e tem sua própria   página. Essas classes são registradas no admin (com @admin.register ou admin.site.register).
+
+    TabularInline / StackedInline (ex.: ParticipanteInline) representam configurações de edição de modelos  relacionados. Eles não são modelos por si só, são apenas instruções que dizem como mostrar/editar os objetos filhos dentro da página do pai.
+
+    Assim: inlines não são registrados isoladamente — eles são referenciados pelo ModelAdmin do pai via inlines =   [...].
+
+---------------------------------------- Inline ADMIN.PY ---------------------------------------------------------
+
+    Class ParticipanteInline(admin.TabularInline):	Cria um Inline (exibição dentro do pai)
+
+    model = Participante  >>>  Diz qual modelo filho esse Inline vai exibir e permitir editar
+
+    inlines = [ParticipanteInline] (no CorridaAdmin)  >>>  Diz onde esse Inline vai aparecer — dentro da Corrida
+
+---------------------------------------- Request VIEWS.PY --------------------------------------------------------
+
+    1 - O request nasce quando o usuário acessa uma URL.
+    2 - O Django o envia para a view correspondente.
+
+---------------------------------- PALAVRAS PRÉ RESERVADAS OU APENAS CONVENÇÕES ----------------------------------
+
+    "sender, instance, created, **kwargs": Não são palavras reservadas nem variáveis especiais obrigatórias — são   apenas uma convenção. Entretanto são EXTREMAMENTE RECOMENDADAS.
+
+------------------------------------ Como funciona o RECEIVER? ---------------------------------------------------
+
+    > @receiver(post_save, sender=ArquivoExcel)
+
+    Toda alteração em ArquivoExcel (seja salvar ou editar) será captada pelo: "post_save", por sua vez, receiver vai    receber esse sinal/essa alteração e "ativar"a função. 
+    - Função: O @receiver(post_save, sender=ArquivoExcel) “escuta” esse evento e sua função é ativada automaticamente.
+
+    Exemplo Real: Sempre que uma nova encomenda (arquivo) cai na caixa (ArquivoExcel é salvo), o vigia (post_save)  avisa o supervisor (@receiver), que então aciona o botão (extrair_dados_excel) para processar o conteúdo.
+
+------------------------------------------- DATA FRAME (df) ------------------------------------------------------
+
+    - DataFrame em Python é uma estrutura de dados bidimensional semelhante a uma planilha ou tabela de banco de dados, que organiza dados em linhas e colunas. Ele é um objeto fundamental da biblioteca PANDAS.   
+    - Estrutura tabular: Os dados são organizados em uma grade de linhas e colunas, com rótulos para ambas.
+
+--------------------------------- DICIONÁRIO de palavras funções PANDAS ------------------------------------------
+
+    📘 1. Criação e leitura de dados
+
+    >> pd.DataFrame() -- Cria uma tabela (DataFrame) a partir de listas, dicionários etc.
+    >> pd.read_json('arquivo.(tipo do arquivo '.json', '.xlsx' ... )') -- Lê arquivos JSON, Excel, ...
+    >> df.to_excel('arquivo.xlsx') -- Salva o DataFrame em Excel
+
+    🔍 2. Visualização e inspeção
+
+    >> df.columns -- Lista os nomes das colunas.
+    >> df.index	-- Mostra os índices (numeração das linhas).
+    >> df.head() -- Mostra as 5 primeiras linhas.
+    >> df.tail() -- Mostra as 5 últimas linhas.
+    >> df.shape -- Mostra o tamanho (linhas, colunas).
+
+    ✏️ 3. Seleção e filtragem
+
+    >> df['coluna'] -- Acessa uma coluna.
+    >> df[['coluna1', 'coluna2']] -- Acessa várias colunas.
+    >> df.loc[linha, coluna] -- Acessa valores por rótulo.
+    >> df.iloc[linha, coluna] -- Acessa valores por posição numérica.
+    >> df[df['idade'] > 18] -- Filtra linhas com base em uma condição.  
+
+    🔄 4. Edição e limpeza
+
+    >> df.drop(columns=['coluna']) -- Remove colunas.
+    >> df.dropna() -- Remove linhas com valores vazios.
+    >> df.fillna(0) -- Substitui valores vazios.
+    >> df.rename(columns={'antigo':'novo'}) -- Renomeia colunas.
+    >> df.sort_values('coluna') -- Ordena por uma coluna.
+    >> df.reset_index() -- Redefine os índices.     
+
+    ➕ 5. Análise e agrupamento
+
+    >>  df.groupby('coluna') -- Agrupa dados por categoria.
+    >>  df['coluna'].value_counts() -- Conta valores repetidos.
+    >>  df['coluna'].mean() -- Calcula média.
+    >>  df['coluna'].sum() -- Soma valores.
+    >>  df['coluna'].max() / df['coluna'].min() -- Máximo e mínimo.
+    
+------------------------------------------ SIGNALS.PY ------------------------------------------------------------
+
+   
+  O que faz: O signals.py no Django é um arquivo onde você coloca funções que são executadas automaticamente quando algo acontece no banco de dados.
+
+  Exemplo:
+    Imagine que você faz upload de um arquivo Excel no site.
+  Você pode criar um signal que “ouve” quando um novo arquivo é salvo no banco, e então roda automaticamente uma função que lê o Excel e salva os dados em outra tabela.
+
+--------------------------------------------- PYTHON -------------------------------------------------------------
+    FOR X IN Y: 
+        “Percorra cada elemento de Y e, a cada repetição, chame(atribua valor) o/ao elemento atual de X.”
+        “Em for X in Y, cada elemento de Y será atribuído à variável X, um por vez.”
+
+------------------------------------- DJANGO FILTERS ------------------------------------------------------
+    >> 'colocacao': ['gte', 'lte'], 
+       'gte': Seleciona documentos com valor no campo maior ou igual ao especificado. 
+       'lte': Seleciona documentos com valor no campo menor ou igual ao especificado.
+
+       - Essa sintaxe indica que você quer encontrar registros cuja "colocacao" esteja entre dois valores, inclusivamente.
+       - Exemplo de uso:
+            Para buscar produtos com a colocação (ranking) entre 1 e 10:

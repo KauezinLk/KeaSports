@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div class="w-full py-6">
+  <h1 class="text-4xl font-bold text-center mt-10">
+    {{ arquivo.nome }}
+  </h1>
+
+  <p class="text-base text-gray-400 italic mt-1 mb-16 text-center">
+    Classificação Kea Sports
+  </p>
+
+  {% if page.object_list %}
+
+  <!-- FILTROS -->
+  <div class="mb-6">
+    <form method="get" class="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div class="w-full">
+        <label class="block text-sm text-gray-600 mb-1">Nome</label>
+        {{ filter.form.nome|add_class:"w-full rounded-lg border-2 border-gray-300 px-4 py-2 focus:outline-none focus:ring-0" }}
+      </div>
+
+      <div class="w-full sm:w-56">
+        <label class="block text-sm text-gray-600 mb-1">Categoria</label>
+        {{ filter.form.categoria }}
+      </div>
+
+      <button
+        type="submit"
+        class="w-full sm:w-auto rounded-lg border-2 border-gray-300 bg-white px-6 py-2 text-gray-400 hover:bg-gray-200"
+      >
+        Filtrar
+      </button>
+    </form>
+  </div>
+
+  <!-- TABELA -->
+  <div class="w-full overflow-x-auto shadow-md rounded-2xl mt-6">
+    <table class="w-full min-w-full text-sm text-center">
+      <thead class="bg-white text-black font-bold">
+        <tr>
+          <th class="p-3 text-md">Colocação</th>
+          <th class="p-3">Nome</th>
+          <th class="p-3">Categoria</th>
+          <th class="p-3">Equipe</th>
+          <th class="p-3">Tempo</th>
+          <th class="p-3">Vel. Média</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for c in page.object_list %}
+        <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200">
+          <td class="p-3 font-semibold">{{ c.colocacao }}</td>
+          <td class="p-3 text-left">{{ c.nome }}</td>
+          <td class="p-3">{{ c.categoria }}</td>
+          <td class="p-3">{{ c.equipe }}</td>
+          <td class="p-3">{{ c.tempo_formatado }}</td>
+          <td class="p-3">{{ c.Vel_media }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+    <p class="text-gray-500 text-center mt-10">
+      Nenhum corredor encontrado.
+    </p>
+  {% endif %}
+
+  <!-- PAGINAÇÃO -->
+  <div class="flex justify-center items-center gap-6 mt-6">
+    {% if page.has_previous %}
+      <a
+        href="?{{ request.GET.urlencode }}&page={{ page.previous_page_number }}"
+        class="px-4 py-2 border rounded-lg text-lg"
+      >
+        ←
+      </a>
+    {% endif %}
+
+    <span class="text-sm text-gray-600">
+      {{ page.number }} / {{ page.paginator.num_pages }}
+    </span>
+
+    {% if page.has_next %}
+      <a
+        href="?{{ request.GET.urlencode }}&page={{ page.next_page_number }}"
+        class="px-4 py-2 border rounded-lg text-lg"
+      >
+        →
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

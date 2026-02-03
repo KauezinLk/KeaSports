@@ -1,0 +1,24 @@
+{% extends "base.html" %} {% block content %}
+
+<h1>Arquivos Excel</h1>
+
+{% if arquivos %}
+<table >
+  <tr>
+    <th>Nome</th>
+    <th>Ações</th>
+  </tr>
+
+  {% for arquivo in arquivos %}
+  <tr>
+    <td>{{ arquivo.nome }}</td>
+    <td>
+      <a href="{% url 'arquivo_detail' arquivo.pk %}"> Ver detalhes </a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% else %}
+<p>Nenhum arquivo enviado ainda.</p>
+{% endif %} {% endblock %}
