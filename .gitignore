@@ -73,3 +73,5 @@ backups/
 # Temporários
 *.tmp
 *.bak
+
+uploads/
