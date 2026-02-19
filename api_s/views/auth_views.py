@@ -37,10 +37,10 @@ def register_view(request):
                 alerta = f"O usuário '{username}' ou o email '{email}' já existe."
     return render(request, "api_s/auth/register.html", {"alerta": alerta})
 
+# Realizar logout
 def logout_view(request):
     logout(request)
-    return redirect("cadastro")
-
+    return redirect('index')  # ou qualquer página de login/home
 
 def teste_login(request):
     return render(request, "api_s/auth/teste_login.html")
@@ -50,9 +50,6 @@ def teste_login(request):
 def logout_confirm(request):
     return render(request, 'api_s/auth/logout.html')
 
-# Realizar logout
-def logout_view(request):
-    logout(request)
-    return redirect('index')  # ou qualquer página de login/home
+
 
                                                         

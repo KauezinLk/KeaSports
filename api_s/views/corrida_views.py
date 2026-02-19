@@ -3,9 +3,13 @@ from api_s.models import Corrida, Participante, Corredor
 from api_s.forms import ParticipanteForm
 from django.core.paginator import Paginator
 
+from api_s.models import Corrida
+
 def index(request):
-    """Página principal do Site"""
-    return render(request, 'api_s/index.html')
+    # pega as próximas corridas
+    corridas = Corrida.objects.all().order_by('data')[:4]  # limite opcional
+    return render(request, 'api_s/index.html', {'corridas': corridas})
+
 
 def listar_corridas(request):
     corridas = Corrida.objects.all()

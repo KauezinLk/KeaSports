@@ -2,18 +2,20 @@ import django_filters
 from api_s.models import Corredor
 
 
-class CorredorFilter(django_filters.FilterSet):
+class CorredorFilter(django_filters.FilterSet): # Cria um filtro de busca para o modelo Corredor usando o pacote django-filter.
 
     nome = django_filters.CharFilter(
         field_name="nome",
         lookup_expr="icontains",
-        label="Nome"
+        label="Nome",
+
     )
 
-    categoria = django_filters.ChoiceFilter(
+    categoria = django_filters.ChoiceFilter( # Filtro por lista de opções
         field_name="categoria",
         label="Categoria",
-        empty_label="Todas"
+        empty_label="Todas",
+        
     )
 
     class Meta:
@@ -21,7 +23,7 @@ class CorredorFilter(django_filters.FilterSet):
         fields = ["nome", "categoria"]
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)                                   
 
         self.filters["categoria"].extra["choices"] = (
             Corredor.objects

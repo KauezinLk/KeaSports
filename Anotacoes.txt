@@ -108,3 +108,133 @@
        - Essa sintaxe indica que você quer encontrar registros cuja "colocacao" esteja entre dois valores, inclusivamente.
        - Exemplo de uso:
             Para buscar produtos com a colocação (ranking) entre 1 e 10:
+
+---------------------------------------- Tudo sobre PK ----------------------------------------------------------
+
+        pk = PK serve para identificar qual dentre os arquivos do banco eu quero.
+                ex: corrida.xlsx ------------- id(pk): 1
+                    corridaRevolucao.xlsx ---- id(pk): 2
+                    corridaSp.xlsx  ---------- id(pk): 3
+        
+        Utilidade: pk = pk -- Ocorre isso, view recebe que o usuário acessou o arquivo 3, agora o django pega esse ide 3 
+        e procura no banco o arquivo de id 3
+
+-------------------------------------------- ID - FUNÇÃO ------------------------------------------------------------
+        
+        ID: O id serve para que o JS localize o elemento, e a partir disso possa enviar uma resposta para o prórpio (também são possíveis outras ações, mas no meu caso apenas essa esta sendo realizada).
+
+        ex: >>  <input type="hidden" name="categoria" id="categoria-input" 
+                    value="{{ request.GET.categoria|default:'' }}">
+
+                -- id="categoria-input" será usado pelo JS para que ele saiba para onde enviar a resposta do click.
+
+            >>  const input = document.getElementById("categoria-input");
+
+            >>  list.querySelectorAll("li").forEach(item => {
+
+                    item.addEventListener("click", () => {
+                    const value = item.dataset.value;          
+                    const label = item.textContent.trim();
+
+                  input.value = value;        --- Aqui o valor é enviado para o hidden
+                  text.textContent = label;       
+                  ...
+
+---------------------------------------- Explicando FILTROS --------------------------------------------------------
+
+
+
+    FLUXO GERAL: 
+        
+                Filter / Model (choices) → gera lista de categorias 
+                        ↓
+                Template mostra opções no dropdown
+                        ↓
+                Usuário clica em "30-34 Masculino"
+                        ↓
+                JS pega data-value="30-34M"
+                        ↓
+                Coloca no hidden input
+                        ↓
+                Form envia ?categoria=30-34M
+                        ↓
+                django-filter usa esse valor para filtrar o queryset
+
+
+    >>   <input type="hidden" name="categoria" id="categoria-input"
+                value="{{ request.GET.categoria|default:'' }}">
+
+        - name="categoria" e .categoria, não são objetos, foram apenas a palavra escolhida para ser enviada como parametro na URL. É transporta um valor que originalmente veio do model. Categoria poderia ser trocada por qualquer palavra.
+        - "hidden": No caso do meu código, ele tem a função de ocultar um campo de pesquisa/busca que apareceria em baixo do subtítulo do filtro categoria, permitindo que o usuário digite qual categoria deseja.
+        Além de que o hidden sempre guarda o valor atual da categoria que será enviada ao backend, valor esse que foi escolhido pelo usuário utilizando o JS, ja que o mesmo é um campo invisível.
+
+        - O queryset primeiro pega todos os corredores do arquivo. Depois o CorredorFilter lê request.GET["categoria"] e aplica um filtro no campo categoria, retornando apenas os corredores cuja categoria é igual ao valor enviado (ex: 30-34M).
+
+
+        >> categoria = django_filters.ChoiceFilter( 
+              field_name="categoria",
+              label="Categoria",
+              empty_label="Todas",
+
+        - Campo utilizado para "puxar" as categorias que serão exibidas do dropdown.
+
+
+        <button type="button"
+                id="dropdown-btn" 
+                class="w-full bg-white border-2 border-gray-300 rounded-lg px-4 py-2
+                       flex justify-between items-center hover:bg-gray-100 transition">
+
+          <span id="dropdown-text">
+            {% if request.GET.categoria %}
+              {{ request.GET.categoria }}
+            {% else %}
+              Todas
+            {% endif %}
+          </span>
+
+        - Verifica se existe categoria na URL (request.GET)
+        Ex: ?categoria=30-34
+
+        Se existir → mostra o valor na tela
+        Se não mostra todas as categorias.
+        
+        )
+
+------------------------------------------- request.GET --------------------------------------------------------------
+        
+        - request.GET recebe todos os parâmetros que vêm depois do ? na URL.
+
+        exemplo:
+
+        URL:  /arquivo/1?categoria=20-24&sexo=M&cidade=SP
+
+        No Django:
+
+            request.GET = {
+                "categoria": "20-24",
+                "sexo": "M",
+                cidade": "SP"
+            }
+
+----------------------------------------------- ESTILIZAÇÃO Taillwind ---------------------------------------------------
+
+        grid: Ativa o CSS Grid → os elementos filhos viram “blocos” organizados em linhas e colunas.
+
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        -- Essa é a parte mais importante:
+
+        minmax(260px, 1fr)
+
+        Cada coluna:
+
+        mínimo: 260px
+
+        máximo: ocupa o espaço disponível (1fr = fração do container)
+
+        Ou seja:
+
+        Nunca fica menor que 260px
+
+        Cresce automaticamente se houver espaço
+
+        

@@ -1,39 +1,94 @@
-{% extends 'api_s/auth/auth_base.html' %}
+{% extends "base.html" %} {% load widget_tweaks %} {% block content %}
 
-{% block content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
-  <div class="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
-    
-    <h1 class="text-2xl font-bold text-center text-gray-900">Login</h1>
+<div class="w-full py-6">
+  <h1 class="text-4xl font-bold text-center mt-10">{{ arquivo.nome }}</h1>
 
-    <form method="POST" class="mt-8 space-y-6">
-      {% csrf_token %}
+  <p class="text-base text-gray-400 italic mt-1 mb-16 text-center">
+    Classificação Kea Sports
+  </p>
 
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">Usuário</label>
-        <input type="text" name="username" id="username" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm">
+  {% if page.object_list %}
+
+  <!-- FILTROS -->
+  <div class="mb-6">
+    <form method="get" class="flex flex-col gap-2 sm:flex-row sm:items-end">
+      <div class="w-full">
+        <label class="block text-sm text-gray-600 mb-1">Nome</label>
+        {{ filter.form.nome|add_class:"w-full rounded-lg border-2
+        border-gray-300 px-4 py-2 focus:outline-none focus:ring-0" }}
       </div>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
-        <input type="password" name="password" id="password" required
-               class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm">
+      <div class="w-full sm:w-56">
+        <label class="block text-sm text-gray-600 mb-1">Categoria</label>
+        {{ filter.form.categoria }}
       </div>
 
-      <button type="submit"
-              class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-amber-500 hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
-        Entrar
+      <button
+        type="submit"
+        class="w-full sm:w-auto rounded-lg border-2 border-gray-300 bg-white px-6 py-2 text-gray-400 hover:bg-gray-200"
+      >
+        Filtrar
       </button>
     </form>
+  </div>
 
-    {% if erro %}
-    <p class="text-red-500 mt-4">{{ erro }}</p>
-    <p class="mt-2 text-sm text-gray-600">
-      Não tem uma conta? <a href="{% url 'register' %}" class="text-amber-500 hover:text-amber-600">Cadastre-se aqui</a>
-    </p>
+  <!-- TABELA -->
+  <div class="w-full overflow-x-auto shadow-md rounded-2xl mt-6">
+    <table class="w-full min-w-full text-sm text-center">
+      <thead class="bg-white text-black font-bold">
+        <tr>
+          <th class="p-3 text-md">Colocação</th>
+          <th class="p-3">Nome</th>
+          <th class="p-3">Categoria</th>
+
+          <th class="p-3">Tempo</th>
+          <th class="p-3">Vel. Média</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for c in page.object_list %}
+        <tr class="odd:bg-gray-100 even:bg-white hover:bg-gray-200">
+          <td class="p-3 font-semibold">{{ c.colocacao }}º</td>
+          <td class="p-3 text-left">{{ c.nome }}</td>
+          <td class="p-3">{{ c.categoria }}</td>
+
+          <td class="p-3">{{ c.tempo_formatado }}</td>
+          <td class="p-3">{{ c.Vel_media }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% else %}
+  <p class="text-gray-500 text-center mt-10">Nenhum corredor encontrado.</p>
+  {% endif %}
+
+  <!-- PAGINAÇÃO -->
+  <div class="flex justify-center items-center gap-6 mt-6">
+    {% if page.has_previous %}
+    <a
+      href="?{{ request.GET.urlencode }}&page={{ page.previous_page_number }}"
+      class="px-4 py-2 border rounded-lg text-lg"
+    >
+      ←
+    </a>
     {% endif %}
 
+    <span class="text-sm text-gray-600">
+      {{ page.number }} / {{ page.paginator.num_pages }}
+    </span>
+
+    {% if page.has_next %}
+    <a
+      href="?{{ request.GET.urlencode }}&page={{ page.next_page_number }}"
+      class="px-4 py-2 border rounded-lg text-lg"
+    >
+      →
+    </a>
+    {% endif %}
   </div>
 </div>
+
 {% endblock %}

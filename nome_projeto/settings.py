@@ -6,6 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-diaamz&_726*n0750gef!7#gj39lhud5efz3hzv9bvv*22r*58'
 
+MEDIA_ROOT = BASE_DIR / 'media'   # pasta física
+MEDIA_URL = '/media/'             # endereço web
 
 DEBUG = True
 

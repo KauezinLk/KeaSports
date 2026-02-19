@@ -1,7 +1,58 @@
-<h1>Inscrição para {{ corrida.nome }}</h1>
+{% extends "base.html" %}
+{% load widget_tweaks %}
 
-<form method="post">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit">Inscrever</button>
+{% block content %}
+
+<h1 class="text-3xl font-bold text-center mb-8 p-4 rounded">
+  Inscrição para {{ corrida.nome }}
+</h1>
+
+<form method="post" class="max-w-md mx-auto p-6 bg-white rounded shadow space-y-6">
+  {% csrf_token %}
+
+  <div>
+    <label for="{{ form.nome.id_for_label }}" class="block font-medium mb-1">Nome</label>
+    {{ form.nome|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.nome.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.data_nascimento.id_for_label }}" class="block font-medium mb-1">Data de nascimento</label>
+    {{ form.data_nascimento|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.data_nascimento.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.cpf.id_for_label }}" class="block font-medium mb-1">CPF</label>
+    {{ form.cpf|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.cpf.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.equipe.id_for_label }}" class="block font-medium mb-1">Equipe</label>
+    {{ form.equipe|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.equipe.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.tamanho_camisa.id_for_label }}" class="block font-medium mb-1">Tamanho da camisa</label>
+    {{ form.tamanho_camisa|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.tamanho_camisa.errors }}
+  </div>
+
+  <div>
+    <label for="{{ form.sexo.id_for_label }}" class="block font-medium mb-1">Sexo</label>
+    {{ form.sexo|add_class:"px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200" }}
+    {{ form.sexo.errors }}
+  </div>
+
+  <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+    Inscrever
+  </button>
 </form>
-<a href="{% url 'listar_corridas' %}">Voltar para a lista de corridas</a>
+
+<a href="{% url 'listar_corridas' %}" class="text-blue-500 hover:underline mt-4 inline-block">
+  Voltar para a lista de corridas
+</a>
+
+{% endblock %}

@@ -7,30 +7,31 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Tailwind CSS -->
-    <link rel="stylesheet" href="{% static 'css/output.css' %}" />
+  
+    <link rel="stylesheet" href="{% static 'css/output.css' %}?v=1">
+
   </head>
 
   <body class="bg-gray-50 min-h-screen flex flex-col">
-    <!-- HEADER -->
+    
     <header
       class="h-16 bg-[#E30000] text-white flex items-center justify-between px-4 border-b fixed top-0 left-0 right-0 z-50"
     >
-      <span class="font-semibold">Kea Sports</span>
+      <span class="font-semibold text-2xl">Kea Sports</span>
 
       <nav class="hidden lg:flex gap-4">
-        <a class="hover:text-amber-400" href="{% url 'index' %}">Início</a>
-        <a class="hover:text-amber-400" href="{% url 'listar_corridas' %}"
+        <a class="hover:text-gray-400 font-bold" href="{% url 'index' %}">Início</a>
+        <a class="hover:text-gray-400 font-bold" href="{% url 'listar_corridas' %}"
           >Corridas</a
         >
-        <a class="hover:text-amber-400" href="{% url 'arquivo_list' %}"
+        <a class="hover:text-gray-400 font-bold" href="{% url 'arquivo_list' %}"
           >Resultados</a
         >
-        <a class="hover:text-amber-400" href="{% url 'register' %}"
+        <a class="hover:text-gray-400 font-bold" href="{% url 'register' %}"
           >Cadastrar-se</a
         >
-        <a class="hover:text-amber-400" href="{% url 'cadastro' %}">Entrar</a>
-        <a class="hover:text-amber-400" href="{% url 'logout_confirm' %}"
+        <a class="hover:text-gray-400 font-bold" href="{% url 'cadastro' %}">Entrar</a>
+        <a class="hover:text-gray-400 font-bold" href="{% url 'logout_confirm' %}"
           >Sair</a
         >
       </nav>
@@ -69,7 +70,7 @@
 
     <!-- conteúdo do site -->
      <!-- p = espaço entre as laterais - pt espaço do topo -->
-    <main class="flex-1 p-6 pt-20">{% block content %}{% endblock content %}</main>
+    <main class="flex-1 p-8 pt-20 md:p-14 md:pt-20">{% block content %}{% endblock content %}</main>
 
     <footer class="bg-gray-900 text-white text-center p-4">
       2026 Kea Sports

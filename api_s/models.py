@@ -2,15 +2,22 @@ from django.db import models
 from datetime import date
 from django.contrib.auth.models import User
 
-
+# Cria uma coluna e uma chave estrangeira para o modelo Corrida.
 class Participante(models.Model):
-    # Cria uma coluna e uma chave estrangeira para o modelo Corrida.
+    
+    # Cria relação um-para-um com o modelo User:
+        # Um User só pode ter um Participante
+        # Um Participante pertence a um único User
+        # Diferente de ForeignKey (1-para-muitos).
+    usuario = models.OneToOneField(User,on_delete=models.CASCADE, null=True, blank=True, related_name="participante"
+)
+
     corrida = models.ForeignKey('Corrida', on_delete=models.CASCADE, related_name='participantes') 
     nome = models.CharField(max_length=100)
     data_nascimento = models.DateField()
     idade = models.IntegerField(blank=True, null=True)
     categoria = models.CharField(max_length=8, blank=True, null=True)
-    cpf = models.CharField(max_length=14)  
+    cpf = models.CharField(max_length=14, unique=True)
     equipe = models.CharField(max_length=100, null=True, blank=True)   
     tamanho_camisa = models.CharField(max_length=1, blank=True, null=True)
 
@@ -65,6 +72,7 @@ class Corrida(models.Model):
     nome = models.CharField(max_length=100)
     local = models.CharField(max_length=100)
     data = models.DateField()
+    imagem = models.ImageField(upload_to='corridas/', blank=True, null=True)
 
     class Meta:
         verbose_name = "Inscrição Corrida"
@@ -73,13 +81,16 @@ class Corrida(models.Model):
     def __str__(self):
         return self.nome
     
+
 # Modelo para armazenar arquivos Excel enviados
 
 class ArquivoExcel(models.Model):
     nome = models.CharField(max_length=50)
     data_corrida = models.CharField(max_length=15, null=True, blank=True)
+    local = models.CharField(max_length=60, null=True, blank=True) 
     arquivo = models.FileField(upload_to='uploads/')
     criado_em = models.DateTimeField(auto_now_add=True)
+    imagem = models.ImageField(upload_to='imagens/', blank=True, null=True)
 
     class Meta:
         verbose_name = "Resultado"
@@ -90,7 +101,14 @@ class ArquivoExcel(models.Model):
        
 # Modelo para armazenar resultados de participantes
 
-class Corredor(models.Model):
+class Corredor(models.Model): # Resultados individuais dos corredores, relacionados a um arquivo específico.
+    participante = models.ForeignKey(
+    Participante,
+    on_delete=models.CASCADE,
+    related_name="resultados"
+)
+
+
     arquivo = models.ForeignKey(ArquivoExcel, on_delete=models.CASCADE, null=True, blank=True)  
     colocacao = models.IntegerField()
     numero = models.CharField(max_length=10)
