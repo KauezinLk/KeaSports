@@ -1,6 +1,7 @@
 # Importa o módulo de administração do Django
 from django.contrib import admin
 from django.utils.html import format_html
+
 # Importa os modelos
 from api_s.models import Corrida, Participante, ArquivoExcel, Corredor
 
@@ -46,8 +47,9 @@ class ParticipanteAdmin(admin.ModelAdmin):
         'tamanho_camisa',
         'categoria',
     )
-    search_fields = ('nome', 'equipe', 'categoria', 'sexo')
+    search_fields = ('nome', 'equipe', 'categoria', 'sexo', 'cpf')
     list_filter = ('corrida', 'sexo', 'categoria')
+
 
 # ADMIN ARQUIVO EXCEL (COM PREVIEW DE IMAGEM)
 
@@ -65,6 +67,7 @@ class ArquivoExcelAdmin(admin.ModelAdmin):
 
     preview_imagem.short_description = "Imagem"
 
+
 # ADMIN CORREDOR
 
 @admin.register(Corredor)
@@ -76,6 +79,7 @@ class CorredorAdmin(admin.ModelAdmin):
         'categoria',
         'arquivo',
     )
+
     search_fields = ('nome', 'numero')
     list_filter = ('arquivo', 'categoria')
     ordering = ('colocacao',)

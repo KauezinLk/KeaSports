@@ -1,82 +1,668 @@
 {% extends 'api_s/auth/auth_base.html' %}
 
 {% block content %}
-<div
-  class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8"
->
-  <div class="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
-    <h1 class="text-2xl font-bold text-center text-gray-900">
-      Cadastro
-    </h1>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-neutral-50 to-red-50/30 px-4 py-8 sm:px-6 lg:px-8">
 
+<div class="w-full max-w-md space-y-6 bg-white p-8 sm:p-10 rounded-2xl shadow-xl shadow-black/5 border border-gray-100 transition-all duration-300">
+
+    <!-- Header com Logo/Ícone -->
+    <div class="text-center">
+      <div class="mx-auto w-16 h-16 bg-gradient-to-br from-red-500 to-red-700 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-500/30">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </div>
+      <h1 class="text-2xl sm:text-3xl font-semibold text-gray-900 tracking-tight">
+        Cadastro
+      </h1>
+      <p class="mt-2 text-sm text-gray-400">
+        Preencha seus dados para se inscrever na corrida
+      </p>
+    </div>
+
+    <!-- Mensagem de Alerta Inline -->
     {% if alerta %}
-    <script>
-      alert("{{ alerta }}");
-    </script>
+    <div id="alerta-global" class="bg-red-50/80 backdrop-blur-sm border border-red-100 text-red-700 px-4 py-3.5 rounded-xl text-sm flex items-start gap-3 shadow-sm" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0 mt-0.5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+      </svg>
+      <span class="flex-1">{{ alerta }}</span>
+      <button type="button" class="text-red-400 hover:text-red-600 transition-colors flex-shrink-0" onclick="this.parentElement.remove()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
     {% endif %}
 
-    <form method="POST" autocomplete="off" class="mt-8 space-y-6">
+    <!-- Mensagens de erro por campo -->
+    <div id="erros-campos" class="hidden bg-red-50/80 backdrop-blur-sm border border-red-100 rounded-xl p-4 space-y-2 shadow-sm" role="alert">
+      <p class="text-sm font-semibold text-red-800">Por favor, corrija os erros abaixo:</p>
+      <ul id="lista-erros" class="list-disc list-inside text-sm text-red-600 space-y-1"></ul>
+    </div>
+
+    <form method="POST" autocomplete="off" class="space-y-5" id="form-cadastro" novalidate>
       {% csrf_token %}
 
-      <div>
-        <label for="username" class="block text-sm font-medium text-gray-700">
-          Usuário
+      <!-- Nome Completo -->
+      <div class="space-y-2">
+        <label for="nome_completo" class="block text-sm font-medium text-gray-600">
+          Nome Completo <span class="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          name="username"
-          id="username"
-          required
-          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm
-                 focus:border-amber-500 sm:text-sm"
-        />
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="nome_completo"
+            name="nome_completo"
+            required
+            minlength="3"
+            placeholder="Digite seu nome completo"
+            aria-describedby="nome-error"
+            class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+        </div>
+        <p id="nome-error" class="hidden text-red-500 text-xs mt-1.5 flex items-center gap-1"></p>
       </div>
 
-      <div>
-        <label for="email" class="block text-sm font-medium text-gray-700">
-          Email
+      <!-- CPF -->
+      <div class="space-y-2">
+        <label for="cpf" class="block text-sm font-medium text-gray-600">
+          CPF <span class="text-red-500">*</span>
         </label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          required
-          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm
-                 focus:border-amber-500 sm:text-sm"
-        />
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="cpf"
+            name="cpf"
+            inputmode="numeric"
+            maxlength="14"
+            placeholder="000.000.000-00"
+            oninput="formatarCPF(this)"
+            required
+            aria-describedby="cpf-error cpf-help"
+            class="block w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+          <div id="cpf-validacao" class="absolute inset-y-0 right-0 pr-3.5 flex items-center hidden">
+            <svg id="cpf-valido" class="h-5 w-5 text-emerald-500 hidden" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <svg id="cpf-invalido" class="h-5 w-5 text-red-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <p id="cpf-help" class="text-xs text-gray-400 mt-1.5">Digite apenas números</p>
+        <p id="cpf-error" class="hidden text-red-500 text-xs mt-1.5"></p>
       </div>
 
-      <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">
-          Senha
+      <!-- Data de Nascimento -->
+      <div class="space-y-2">
+        <label for="data_nascimento" class="block text-sm font-medium text-gray-600">
+          Data de Nascimento <span class="text-red-500">*</span>
         </label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          required
-          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm
-                 focus:border-amber-500 sm:text-sm"
-        />
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <input
+            type="date"
+            id="data_nascimento"
+            name="data_nascimento"
+            required
+            aria-describedby="nascimento-error nascimento-help"
+            class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+        </div>
+        <p id="nascimento-help" class="text-xs text-gray-400 mt-1.5">Idade mínima: 16 anos</p>
+        <p id="nascimento-error" class="hidden text-red-500 text-xs mt-1.5"></p>
       </div>
 
+      <!-- Sexo -->
+      <div class="space-y-2">
+        <label for="sexo" class="block text-sm font-medium text-gray-600">
+          Sexo <span class="text-red-500">*</span>
+        </label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+          <select
+            id="sexo"
+            name="sexo"
+            required
+            aria-describedby="sexo-error"
+            class="block w-full pl-11 pr-10 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out appearance-none"
+          >
+            <option value="">Selecione</option>
+            <option value="M">Masculino</option>
+            <option value="F">Feminino</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        <p id="sexo-error" class="hidden text-red-500 text-xs mt-1.5"></p>
+      </div>
+
+      <!-- Tamanho da Camisa -->
+      <div class="space-y-2">
+        <label for="tamanho_camisa" class="block text-sm font-medium text-gray-600">
+          Tamanho da Camisa <span class="text-red-500">*</span>
+        </label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          </div>
+          <select
+            id="tamanho_camisa"
+            name="tamanho_camisa"
+            required
+            aria-describedby="tamanho-error"
+            class="block w-full pl-11 pr-10 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out appearance-none"
+          >
+            <option value="">Selecione</option>
+            <option value="P">P - Pequeno</option>
+            <option value="M" selected>M - Médio</option>
+            <option value="G">G - Grande</option>
+          </select>
+          <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+        <p id="tamanho-error" class="hidden text-red-500 text-xs mt-1.5"></p>
+      </div>
+
+      <!-- Equipe (Opcional) -->
+      <div class="space-y-2">
+        <label for="equipe" class="block text-sm font-medium text-gray-600">
+          Equipe <span class="text-gray-400 font-normal">(opcional)</span>
+        </label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="equipe"
+            name="equipe"
+            maxlength="100"
+            placeholder="Nome da sua equipe"
+            aria-describedby="equipe-help"
+            class="block w-full pl-11 pr-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+        </div>
+        <p id="equipe-help" class="text-xs text-gray-400 mt-1.5">Caso não tenha equipe, deixe em branco</p>
+      </div>
+
+      <!-- Senha -->
+      <div class="space-y-2">
+        <label for="password" class="block text-sm font-medium text-gray-600">
+          Senha <span class="text-red-500">*</span>
+        </label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            minlength="6"
+            required
+            placeholder="Mínimo 6 caracteres"
+            aria-describedby="senha-error senha-requisitos senha-forca"
+            class="block w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-300 hover:text-gray-500 transition-colors duration-200"
+            onclick="toggleSenha('password', this)"
+            aria-label="Mostrar ou ocultar senha"
+          >
+            <svg class="h-5 w-5 icon-olho-aberto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg class="h-5 w-5 icon-olho-fechado hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+        </div>
+        <!-- Indicador de força da senha -->
+        <div id="senha-forca-container" class="hidden mt-2.5">
+          <div class="flex gap-1.5 mb-1.5">
+            <div id="forca-1" class="h-1.5 flex-1 rounded-full bg-gray-100 transition-colors duration-300"></div>
+            <div id="forca-2" class="h-1.5 flex-1 rounded-full bg-gray-100 transition-colors duration-300"></div>
+            <div id="forca-3" class="h-1.5 flex-1 rounded-full bg-gray-100 transition-colors duration-300"></div>
+            <div id="forca-4" class="h-1.5 flex-1 rounded-full bg-gray-100 transition-colors duration-300"></div>
+          </div>
+          <p id="senha-forca" class="text-xs text-gray-400"></p>
+        </div>
+        <!-- Requisitos da senha -->
+        <ul id="senha-requisitos" class="text-xs text-gray-400 space-y-1.5 mt-2">
+          <li id="req-minimo" class="flex items-center gap-1.5">
+            <svg class="h-3 w-3 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="3"/></svg>
+            Mínimo 6 caracteres
+          </li>
+        </ul>
+        <p id="senha-error" class="hidden text-red-500 text-xs mt-1.5"></p>
+      </div>
+
+      <!-- Confirmar Senha -->
+      <div class="space-y-2">
+        <label for="confirmar_senha" class="block text-sm font-medium text-gray-600">
+          Confirmar Senha <span class="text-red-500">*</span>
+        </label>
+        <div class="relative group">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-300 group-focus-within:text-red-400 transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <input
+            type="password"
+            id="confirmar_senha"
+            name="confirmar_senha"
+            minlength="6"
+            required
+            placeholder="Repita a senha"
+            aria-describedby="confirmar-error"
+            class="block w-full pl-11 pr-12 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-300 focus:bg-white focus:border-red-500 focus:ring-4 focus:ring-red-500/10 sm:text-sm transition-all duration-200 ease-in-out"
+          />
+          <div id="confirmar-validacao" class="absolute inset-y-0 right-0 pr-3.5 flex items-center hidden">
+            <svg id="confirmar-valido" class="h-5 w-5 text-emerald-500 hidden" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <svg id="confirmar-invalido" class="h-5 w-5 text-red-400 hidden" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+          </div>
+        </div>
+        <p id="confirmar-error" class="hidden text-red-500 text-xs mt-1.5"></p>
+      </div>
+
+      <!-- Botão Submit -->
       <button
         type="submit"
-        class="w-full flex justify-center py-2 px-4 border border-transparent
-               rounded-md shadow-sm text-white bg-[#E30000]
-               hover:bg-[#c90000]
-               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+        id="btn-submit"
+        class="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-lg shadow-red-500/25 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-600 hover:from-red-700 hover:to-red-700 focus:outline-none focus:ring-4 focus:ring-red-500/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        Cadastrar
+        <span id="btn-text">Cadastrar</span>
+        <svg id="btn-loading" class="hidden animate-spin h-5 w-5 text-white ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
       </button>
+
     </form>
 
-    <p class="mt-4 text-sm text-gray-600 text-center">
+    <!-- Link para Login -->
+    <div class="relative">
+      <div class="absolute inset-0 flex items-center">
+        <div class="w-full border-t border-gray-100"></div>
+      </div>
+      <div class="relative flex justify-center text-sm">
+        <span class="px-4 bg-white text-gray-400">ou</span>
+      </div>
+    </div>
+    <p class="text-sm text-gray-500 text-center">
       Já tem uma conta?
-      <a href="{% url 'cadastro' %}" class="text-amber-500 hover:text-amber-600">
-        Entrar
+      <a href="{% url 'cadastro' %}" class="font-semibold text-red-600 hover:text-red-500 transition-colors duration-200 inline-flex items-center gap-1">
+        Entrar agora
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
       </a>
     </p>
+
   </div>
 </div>
+
+<script>
+// ==================== MÁSCARA CPF ====================
+function formatarCPF(campo) {
+  let cpf = campo.value.replace(/\D/g, "");
+  
+  // Limita a 11 dígitos
+  cpf = cpf.slice(0, 11);
+  
+  // Aplica a máscara
+  if (cpf.length > 9) {
+    cpf = cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, "$1.$2.$3-$4");
+  } else if (cpf.length > 6) {
+    cpf = cpf.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+  } else if (cpf.length > 3) {
+    cpf = cpf.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+  }
+  
+  campo.value = cpf;
+  
+  // Valida em tempo real
+  validarCPFEmTempoReal(campo);
+}
+
+// ==================== VALIDAÇÃO CPF COM DÍGITOS VERIFICADORES ====================
+function validarCPF(cpf) {
+  // Remove caracteres não numéricos
+  cpf = cpf.replace(/\D/g, "");
+  
+  // Verifica se tem 11 dígitos
+  if (cpf.length !== 11) return false;
+  
+  // Verifica se todos os dígitos são iguais
+  if (/^(\d)\1+$/.test(cpf)) return false;
+  
+  // Calcula primeiro dígito verificador
+  let soma = 0;
+  for (let i = 0; i < 9; i++) {
+    soma += parseInt(cpf.charAt(i)) * (10 - i);
+  }
+  let resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+  if (resto !== parseInt(cpf.charAt(9))) return false;
+  
+  // Calcula segundo dígito verificador
+  soma = 0;
+  for (let i = 0; i < 10; i++) {
+    soma += parseInt(cpf.charAt(i)) * (11 - i);
+  }
+  resto = (soma * 10) % 11;
+  if (resto === 10) resto = 0;
+  if (resto !== parseInt(cpf.charAt(10))) return false;
+  
+  return true;
+}
+
+function validarCPFEmTempoReal(campo) {
+  const cpfNumeros = campo.value.replace(/\D/g, "");
+  const containerValidacao = document.getElementById('cpf-validacao');
+  const iconValido = document.getElementById('cpf-valido');
+  const iconInvalido = document.getElementById('cpf-invalido');
+  const errorMsg = document.getElementById('cpf-error');
+  
+  if (cpfNumeros.length === 0) {
+    containerValidacao.classList.add('hidden');
+    errorMsg.classList.add('hidden');
+    campo.classList.remove('border-green-500', 'border-red-500');
+    return;
+  }
+  
+  containerValidacao.classList.remove('hidden');
+  
+  if (validarCPF(campo.value)) {
+    iconValido.classList.remove('hidden');
+    iconInvalido.classList.add('hidden');
+    campo.classList.remove('border-red-500');
+    campo.classList.add('border-green-500');
+    errorMsg.classList.add('hidden');
+  } else if (cpfNumeros.length === 11) {
+    iconValido.classList.add('hidden');
+    iconInvalido.classList.remove('hidden');
+    campo.classList.remove('border-green-500');
+    campo.classList.add('border-red-500');
+    errorMsg.textContent = 'CPF inválido';
+    errorMsg.classList.remove('hidden');
+  } else {
+    iconValido.classList.add('hidden');
+    iconInvalido.classList.add('hidden');
+    campo.classList.remove('border-green-500', 'border-red-500');
+    errorMsg.classList.add('hidden');
+  }
+}
+
+// ==================== TOGGLE SENHA ====================
+function toggleSenha(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const iconAberto = btn.querySelector('.icon-olho-aberto');
+  const iconFechado = btn.querySelector('.icon-olho-fechado');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    iconAberto.classList.add('hidden');
+    iconFechado.classList.remove('hidden');
+  } else {
+    input.type = 'password';
+    iconAberto.classList.remove('hidden');
+    iconFechado.classList.add('hidden');
+  }
+}
+
+// ==================== INDICADOR DE FORÇA DA SENHA ====================
+function verificarForcaSenha(senha) {
+  let forca = 0;
+  
+  // Mínimo 6 caracteres
+  if (senha.length >= 6) forca++;
+  if (senha.length >= 8) forca++;
+  
+  // Contém letra maiúscula e minúscula
+  if (/[a-z]/.test(senha) && /[A-Z]/.test(senha)) forca++;
+  
+  // Contém número
+  if (/\d/.test(senha)) forca++;
+  
+  // Contém caractere especial
+  if (/[^a-zA-Z0-9]/.test(senha)) forca++;
+  
+  return Math.min(forca, 4);
+}
+
+function atualizarIndicadorForca(senha) {
+  const container = document.getElementById('senha-forca-container');
+  const texto = document.getElementById('senha-forca');
+  const barras = [
+    document.getElementById('forca-1'),
+    document.getElementById('forca-2'),
+    document.getElementById('forca-3'),
+    document.getElementById('forca-4')
+  ];
+  
+  if (senha.length === 0) {
+    container.classList.add('hidden');
+    return;
+  }
+  
+  container.classList.remove('hidden');
+  const forca = verificarForcaSenha(senha);
+  
+  const cores = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+  const textos = ['Muito fraca', 'Fraca', 'Média', 'Forte'];
+  
+  barras.forEach((barra, index) => {
+    // Remove todas as cores
+    cores.forEach(cor => barra.classList.remove(cor));
+    barra.classList.add('bg-gray-200');
+    
+    if (index < forca) {
+      barra.classList.remove('bg-gray-200');
+      barra.classList.add(cores[Math.min(forca, 4) - 1]);
+    }
+  });
+  
+  texto.textContent = textos[Math.min(forca, 4) - 1] || 'Muito fraca';
+  texto.className = 'text-xs ' + (forca <= 1 ? 'text-red-500' : forca <= 2 ? 'text-yellow-500' : 'text-green-500');
+}
+
+// ==================== VALIDAÇÃO DATA DE NASCIMENTO ====================
+function validarDataNascimento(dataInput) {
+  if (!dataInput) return { valido: false, mensagem: '', idade: 0 };
+  
+  const hoje = new Date();
+  const nascimento = new Date(dataInput + 'T00:00:00');
+  
+  let idade = hoje.getFullYear() - nascimento.getFullYear();
+  const mesDiff = hoje.getMonth() - nascimento.getMonth();
+  
+  if (mesDiff < 0 || (mesDiff === 0 && hoje.getDate() < nascimento.getDate())) {
+    idade--;
+  }
+  
+  if (idade < 16) {
+    return { valido: false, mensagem: 'Idade mínima: 16 anos', idade };
+  }
+  
+  if (idade > 120) {
+    return { valido: false, mensagem: 'Data de nascimento inválida', idade };
+  }
+  
+  return { valido: true, mensagem: '', idade };
+}
+
+// ==================== VALIDAÇÃO EM TEMPO REAL DOS CAMPOS ====================
+document.addEventListener('DOMContentLoaded', function() {
+  const passwordInput = document.getElementById('password');
+  const confirmarInput = document.getElementById('confirmar_senha');
+  const dataInput = document.getElementById('data_nascimento');
+  const form = document.getElementById('form-cadastro');
+  
+  // Validação de senha em tempo real
+  passwordInput.addEventListener('input', function() {
+    atualizarIndicadorForca(this.value);
+    if (confirmarInput.value) validarConfirmacaoSenha();
+  });
+  
+  // Validação de confirmação de senha
+  confirmarInput.addEventListener('input', validarConfirmacaoSenha);
+  
+  // Validação de data de nascimento
+  dataInput.addEventListener('change', function() {
+    const resultado = validarDataNascimento(this.value);
+    const errorMsg = document.getElementById('nascimento-error');
+    
+    if (!resultado.valido && this.value) {
+      errorMsg.textContent = resultado.mensagem;
+      errorMsg.classList.remove('hidden');
+      this.classList.add('border-red-500');
+    } else {
+      errorMsg.classList.add('hidden');
+      this.classList.remove('border-red-500');
+      if (resultado.valido) {
+        this.classList.add('border-green-500');
+      }
+    }
+  });
+  
+  // Validação no submit do formulário
+  form.addEventListener('submit', function(e) {
+    let erros = [];
+    const errosContainer = document.getElementById('erros-campos');
+    const listaErros = document.getElementById('lista-erros');
+    listaErros.innerHTML = '';
+    
+    // Valida nome
+    const nome = document.getElementById('nome_completo');
+    if (nome.value.trim().length < 3) {
+      erros.push('Nome deve ter pelo menos 3 caracteres');
+    }
+    
+    // Valida CPF
+    const cpf = document.getElementById('cpf');
+    if (!validarCPF(cpf.value)) {
+      erros.push('CPF inválido');
+    }
+    
+    // Valida data
+    const data = document.getElementById('data_nascimento');
+    if (!data.value) {
+      erros.push('Data de nascimento é obrigatória');
+    } else {
+      const resultado = validarDataNascimento(data.value);
+      if (!resultado.valido) {
+        erros.push(resultado.mensagem);
+      }
+    }
+    
+    // Valida sexo
+    const sexo = document.getElementById('sexo');
+    if (!sexo.value) {
+      erros.push('Selecione o sexo');
+    }
+    
+    // Valida tamanho da camisa
+    const tamanho = document.getElementById('tamanho_camisa');
+    if (!tamanho.value) {
+      erros.push('Selecione o tamanho da camisa');
+    }
+    
+    // Valida senha
+    if (passwordInput.value.length < 6) {
+      erros.push('Senha deve ter no mínimo 6 caracteres');
+    }
+    
+    // Valida confirmação
+    if (passwordInput.value !== confirmarInput.value) {
+      erros.push('As senhas não coincidem');
+    }
+    
+    if (erros.length > 0) {
+      e.preventDefault();
+      erros.forEach(erro => {
+        const li = document.createElement('li');
+        li.textContent = erro;
+        listaErros.appendChild(li);
+      });
+      errosContainer.classList.remove('hidden');
+      errosContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+});
+
+function validarConfirmacaoSenha() {
+  const password = document.getElementById('password').value;
+  const confirmar = document.getElementById('confirmar_senha');
+  const errorMsg = document.getElementById('confirmar-error');
+  const containerValidacao = document.getElementById('confirmar-validacao');
+  const iconValido = document.getElementById('confirmar-valido');
+  const iconInvalido = document.getElementById('confirmar-invalido');
+  
+  if (confirmar.value.length === 0) {
+    containerValidacao.classList.add('hidden');
+    errorMsg.classList.add('hidden');
+    confirmar.classList.remove('border-green-500', 'border-red-500');
+    return;
+  }
+  
+  containerValidacao.classList.remove('hidden');
+  
+  if (confirmar.value === password) {
+    iconValido.classList.remove('hidden');
+    iconInvalido.classList.add('hidden');
+    confirmar.classList.remove('border-red-500');
+    confirmar.classList.add('border-green-500');
+    errorMsg.classList.add('hidden');
+  } else {
+    iconValido.classList.add('hidden');
+    iconInvalido.classList.remove('hidden');
+    confirmar.classList.remove('border-green-500');
+    confirmar.classList.add('border-red-500');
+    errorMsg.textContent = 'As senhas não coincidem';
+    errorMsg.classList.remove('hidden');
+  }
+}
+</script>
+
 {% endblock %}

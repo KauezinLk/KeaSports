@@ -237,4 +237,7 @@
 
         Cresce automaticamente se houver espaço
 
-        
+-------------------------------------- Probleman CPF -------------------------------------------
+
+        Criar cpf fake para cada corredor - Quando for NULL cpf fake, quando o usuario inserir um cpf o fake será substituído.
+    

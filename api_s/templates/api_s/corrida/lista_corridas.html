@@ -1,95 +1,195 @@
 {% if corridas %}
 
-<div class="relative max-w-6xl mx-auto overflow-visible">
-
-  <!-- BOTÃO ESQUERDA -->
-  <button onclick="scrollCorridas(-1)"
-    class="absolute -left-14 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100">
-    ◀
+<div class="relative max-w-6xl mx-auto px-4 sm:px-0">
+  <!-- BOTÃO ESQUERDA - escondido em mobile -->
+  <button
+    id="btn-esquerda"
+    class="hidden sm:block absolute -left-14 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition cursor-pointer"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="size-6"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+      />
+    </svg>
   </button>
 
-  <!-- VIEWPORT -->
-  <div class="overflow-hidden">
-    
+  <!-- VIEWPORT com scroll -->
+  <div id="viewport" class="overflow-hidden sm:overflow-visible">
     <!-- TRILHO -->
-    <div id="track" class="flex gap-6 transition-transform duration-300">
-
+    <div id="track" class="flex gap-4 sm:gap-6">
       {% for corrida in corridas %}
-      <div class="min-w-[calc(100%/3-16px)] bg-white rounded-xl shadow-md hover:shadow-lg transition p-4">
-
+      <div
+        class="min-w-[calc(100%-16px)] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.33%-16px)] bg-white rounded-xl shadow-md hover:shadow-lg transition p-4 flex-shrink-0"
+      >
         {% if corrida.imagem %}
-        <img src="{{ corrida.imagem.url }}" alt="{{ corrida.nome }}"
-             class="w-full h-44 object-cover rounded-lg mb-3">
+        <img
+          src="{{ corrida.imagem.url }}"
+          alt="{{ corrida.nome }}"
+          class="w-full h-44 object-cover rounded-lg mb-3"
+        />
         {% else %}
-        <div class="w-full h-44 flex items-center justify-center bg-gray-100 rounded-lg mb-3">
+        <div
+          class="w-full h-44 flex items-center justify-center bg-gray-100 rounded-lg mb-3"
+        >
           —
         </div>
         {% endif %}
 
-        <h2 class="text-lg font-semibold text-gray-800 mb-3">{{ corrida.nome }}</h2>
-        
+        <h2 class="text-lg font-semibold text-gray-800 mb-3">
+          {{ corrida.nome }}
+        </h2>
+
         <p class="text-base text-gray-600 flex items-center gap-2 mb-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-               stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+            />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+            />
           </svg>
           {{ corrida.local }}
         </p>
 
         <p class="text-base text-gray-600 flex items-center gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-               stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-gray-400">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"/>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5 text-gray-400"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+            />
           </svg>
           {{ corrida.data }}
         </p>
 
-        <a href="{% url 'inscrever_corrida' corrida.id %}"
-           class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+        <a
+          href="{% url 'inscrever_corrida' corrida.id %}"
+          class="block w-full text-center bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           Inscrever-se
         </a>
-
       </div>
       {% endfor %}
-
     </div>
   </div>
 
-  <!-- BOTÃO DIREITA -->
-  <button onclick="scrollCorridas(1)"
-    class="absolute -right-14 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100">
-    ▶
+  <!-- BOTÃO DIREITA - escondido em mobile -->
+  <button
+    id="btn-direita"
+    class="hidden sm:block absolute -right-14 top-1/2 -translate-y-1/2 z-20 bg-white shadow-lg rounded-full p-3 hover:bg-gray-100 transition cursor-pointer"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="size-6"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3"
+      />
+    </svg>
   </button>
-
 </div>
 
-{% else %}
-<p class="text-gray-500">Não há corridas disponíveis.</p>
-{% endif %}
-
-
 <script>
-let pos = 0;
+document.addEventListener('DOMContentLoaded', function() {
+  const viewport = document.getElementById('viewport');
+  const track = document.getElementById('track');
+  const btnEsquerda = document.getElementById('btn-esquerda');
+  const btnDireita = document.getElementById('btn-direita');
+  
+  if (!viewport || !track) return;
 
-function scrollCorridas(dir) {
-  const track = document.getElementById("track");
-  if (!track) return;
+  let currentScroll = 0;
 
-  const card = track.children[0];
-  const gap = 24; // gap-6
-  const step = card.offsetWidth + gap;
+  function getScrollAmount() {
+    const card = track.children[0];
+    if (!card) return 0;
+    const gap = window.innerWidth >= 640 ? 24 : 16;
+    const cardWidth = card.offsetWidth + gap;
+    const containerWidth = viewport.offsetWidth;
+    const cardsVisible = Math.max(1, Math.round(containerWidth / cardWidth));
+    return cardWidth * cardsVisible;
+  }
 
-  pos += dir * step;
+  function scrollCorridas(dir) {
+    const scrollAmount = getScrollAmount();
+    const maxScroll = track.scrollWidth - viewport.offsetWidth;
+    
+    currentScroll += dir * scrollAmount;
+    
+    if (currentScroll < 0) currentScroll = 0;
+    if (currentScroll > maxScroll) currentScroll = maxScroll;
+    
+    viewport.scrollTo({
+      left: currentScroll,
+      behavior: 'smooth'
+    });
+  }
 
-  const maxScroll = track.scrollWidth - track.parentElement.offsetWidth;
+  // Expor função global para os botões
+  window.scrollCorridas = scrollCorridas;
 
-  if (pos < 0) pos = 0;
-  if (pos > maxScroll) pos = maxScroll;
+  // Event listeners dos botões
+  if (btnEsquerda) {
+    btnEsquerda.addEventListener('click', function() {
+      scrollCorridas(-1);
+    });
+  }
 
-  track.style.transform = `translateX(-${pos}px)`;
-}
+  if (btnDireita) {
+    btnDireita.addEventListener('click', function() {
+      scrollCorridas(1);
+    });
+  }
+
+  // Atualizar currentScroll quando o scroll acontecer
+  viewport.addEventListener('scroll', function() {
+    currentScroll = viewport.scrollLeft;
+  });
+
+  // Recalcular no resize
+  window.addEventListener('resize', function() {
+    const maxScroll = track.scrollWidth - viewport.offsetWidth;
+    if (currentScroll > maxScroll) {
+      currentScroll = maxScroll;
+      viewport.scrollLeft = currentScroll;
+    }
+  });
+});
 </script>
+
+{% else %}
+<p class="text-gray-500 text-center">Não há corridas disponíveis.</p>
+{% endif %}

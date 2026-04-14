@@ -1,0 +1,139 @@
+{% extends 'api_s/auth/auth_base.html' %}
+
+{% block content %}
+
+<div class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8">
+  <div class="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
+
+    {% if usuario_logado %}
+    {# ===== ESTADO: USUÁRIO LOGADO ===== #}
+    <div class="text-center space-y-6">
+      <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">
+          Bem-vindo, {{ user.first_name|default:"Usuário" }}!
+        </h1>
+        <p class="mt-2 text-sm text-gray-600">
+          Você está conectado na sua conta KEA SPORTS
+        </p>
+      </div>
+
+      {% if participante %}
+      <div class="bg-gray-50 rounded-lg p-4 text-left space-y-2">
+        <h2 class="font-semibold text-gray-800 text-sm uppercase tracking-wide">Seus Dados</h2>
+        <div class="space-y-1 text-sm text-gray-700">
+          <p><span class="font-medium">Nome:</span> {{ participante.nome }}</p>
+          <p><span class="font-medium">CPF:</span> {{ participante.cpf }}</p>
+          {% if participante.equipe %}
+          <p><span class="font-medium">Equipe:</span> {{ participante.equipe }}</p>
+          {% endif %}
+          <p><span class="font-medium">Categoria:</span> {{ participante.categoria }}</p>
+          <p><span class="font-medium">Camisa:</span> {{ participante.tamanho_camisa }}</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="space-y-3 pt-4">
+        <a href="{% url 'historico_usuario' %}" 
+           class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+          Ver Histórico de Corridas
+        </a>
+
+        <form method="POST">
+          {% csrf_token %}
+          <button 
+            type="submit" 
+            name="logout" 
+            value="1"
+            class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            Sair da Conta
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {% else %}
+    {# ===== ESTADO: NÃO LOGADO (LOGIN) ===== #}
+    <h1 class="text-2xl font-bold text-center text-gray-900">Login</h1>
+
+    <form method="POST" class="mt-8 space-y-6">
+      {% csrf_token %}
+
+      <div>
+        <label for="cpf" class="block text-sm font-medium text-gray-700">
+          CPF
+        </label>
+
+        <input
+          type="text"
+          name="cpf"
+          id="cpf"
+          maxlength="14"
+          placeholder="000.000.000-00"
+          oninput="formatarCPF(this)"
+          required
+          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+        />
+      </div>
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">
+          Senha
+        </label>
+
+        <input
+          type="password"
+          name="password"
+          id="password"
+          required
+          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#E30000] hover:bg-[#c90000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition"
+      >
+        Entrar
+      </button>
+
+      <p class="mt-2 text-sm text-gray-600 text-center">
+        Não tem uma conta?
+        <a
+          href="{% url 'register' %}"
+          class="text-amber-500 hover:text-amber-600"
+        >
+          Crie sua conta KEA SPORTS
+        </a>
+      </p>
+    </form>
+
+    {% if erro %}
+    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm">
+      {{ erro }}
+    </div>
+    {% endif %}
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+  function formatarCPF(campo) {
+    let cpf = campo.value.replace(/\D/g, "");
+    cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+    cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
+    cpf = cpf.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    campo.value = cpf;
+  }
+</script>
+
+{% endblock %}

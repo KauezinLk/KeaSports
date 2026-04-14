@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="max-w-md mx-auto p-8 bg-white rounded shadow text-center space-y-6">
+  <div class="text-green-600 text-6xl">&#10003;</div>
+
+  <h1 class="text-2xl font-bold text-gray-800">Inscrição realizada com sucesso!</h1>
+
+  <div class="text-left space-y-2 text-gray-700">
+    <p><strong>Corrida:</strong> {{ corrida.nome }}</p>
+    <p><strong>Participante:</strong> {{ participante.nome }}</p>
+    <p><strong>CPF:</strong> {{ participante.cpf }}</p>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+    <a href="{% url 'listar_corridas' %}" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+      Ver mais corridas
+    </a>
+    <a href="{% url 'index' %}" class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300 transition">
+      Voltar ao início
+    </a>
+  </div>
+</div>
+
+{% endblock %}
