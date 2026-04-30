@@ -83,3 +83,24 @@ class CorredorAdmin(admin.ModelAdmin):
     search_fields = ('nome', 'numero')
     list_filter = ('arquivo', 'categoria')
     ordering = ('colocacao',)
+
+
+from django.utils.html import format_html
+from api_s.models import ImagemBase
+
+
+@admin.register(ImagemBase)
+class ImagemBaseAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'ativo', 'preview')
+    list_editable = ('ativo',)
+    search_fields = ('titulo',)
+
+    def preview(self, obj):
+        if obj.imagem:
+            return format_html(
+                '<img src="{}" width="120" style="border-radius:8px;" />',
+                obj.imagem.url
+            )
+        return "—"
+
+    preview.short_description = "Preview"

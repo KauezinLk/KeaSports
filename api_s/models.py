@@ -155,3 +155,13 @@ class Resultados(models.Model):
 
     def __str__(self):
         return self.nome
+
+# IMAGEM BOAS VINDAS SITE   
+
+class ImagemBase(models.Model):
+    titulo = models.CharField(max_length=100)
+    imagem = models.ImageField(upload_to='imagens/')
+    ativo = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.titulo
