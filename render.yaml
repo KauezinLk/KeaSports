@@ -17,18 +17,26 @@ services:
       - key: DJANGO_MEDIA_STORAGE
         value: s3
       - key: AWS_STORAGE_BUCKET_NAME
-        sync: false
+        value: keasports
       - key: AWS_ACCESS_KEY_ID
         sync: false
       - key: AWS_SECRET_ACCESS_KEY
         sync: false
       - key: SUPABASE_STORAGE_URL
-        sync: false
+        value: https://ucolinxrvgyfoadohsbc.supabase.co
+      - key: AWS_S3_ENDPOINT_URL
+        value: https://ucolinxrvgyfoadohsbc.storage.supabase.co/storage/v1/s3
       - key: AWS_S3_REGION_NAME
         sync: false
+      - key: AWS_S3_ADDRESSING_STYLE
+        value: path
+      - key: AWS_S3_SIGNATURE_VERSION
+        value: s3v4
       - key: AWS_LOCATION
         value: media
       - key: AWS_QUERYSTRING_AUTH
+        value: "False"
+      - key: AWS_S3_FILE_OVERWRITE
         value: "False"
       - key: DB_CONN_MAX_AGE
         value: "60"

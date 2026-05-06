@@ -40,6 +40,18 @@ def unique_list(items):
     return result
 
 
+def supabase_public_host(host):
+    if host.endswith(".storage.supabase.co"):
+        return host.replace(".storage.supabase.co", ".supabase.co")
+    return host
+
+
+def supabase_s3_host(host):
+    if host.endswith(".supabase.co") and not host.endswith(".storage.supabase.co"):
+        return host.replace(".supabase.co", ".storage.supabase.co")
+    return host
+
+
 DEBUG = env_bool("DJANGO_DEBUG", False)
 MEDIA_STORAGE = os.getenv("DJANGO_MEDIA_STORAGE", "local").strip().lower()
 RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
@@ -186,53 +198,96 @@ MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 if MEDIA_STORAGE == "s3":
-    required_s3_env = ["AWS_STORAGE_BUCKET_NAME"]
+    required_s3_env = [
+        "AWS_STORAGE_BUCKET_NAME",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+        "AWS_S3_REGION_NAME",
+    ]
     missing_s3_env = [name for name in required_s3_env if not os.getenv(name)]
     if missing_s3_env:
         raise ImproperlyConfigured(
             "Missing required S3 media settings: " + ", ".join(missing_s3_env)
         )
 
-    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
+    AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME", "").strip()
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
-    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+    AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "").strip()
     SUPABASE_STORAGE_URL = os.getenv("SUPABASE_STORAGE_URL", "").strip().rstrip("/")
-    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
-    AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")
-    AWS_LOCATION = os.getenv("AWS_LOCATION", "media")
+    AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL", "").strip().rstrip("/")
+    AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN", "").strip()
+    AWS_LOCATION = os.getenv("AWS_LOCATION", "media").strip().strip("/")
+    AWS_S3_ADDRESSING_STYLE = os.getenv("AWS_S3_ADDRESSING_STYLE", "path").strip() or "path"
+    AWS_S3_SIGNATURE_VERSION = os.getenv("AWS_S3_SIGNATURE_VERSION", "s3v4").strip()
     AWS_DEFAULT_ACL = None
     AWS_QUERYSTRING_AUTH = env_bool("AWS_QUERYSTRING_AUTH", False)
+    AWS_S3_FILE_OVERWRITE = env_bool("AWS_S3_FILE_OVERWRITE", False)
     AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": os.getenv("AWS_S3_CACHE_CONTROL", "max-age=86400"),
     }
 
+    # Supabase exposes two different URL shapes:
+    # - the S3-compatible endpoint is only for boto3 uploads/signatures;
+    # - the public object URL is what browsers must receive for ImageField/FileField URLs.
     if SUPABASE_STORAGE_URL:
         parsed_supabase_url = urlparse(SUPABASE_STORAGE_URL)
         supabase_host = parsed_supabase_url.netloc or parsed_supabase_url.path
+        supabase_host = supabase_host.strip().rstrip("/")
 
         if not AWS_S3_ENDPOINT_URL:
-            AWS_S3_ENDPOINT_URL = f"https://{supabase_host}/storage/v1/s3"
+            AWS_S3_ENDPOINT_URL = f"https://{supabase_s3_host(supabase_host)}/storage/v1/s3"
         if not AWS_S3_CUSTOM_DOMAIN:
             AWS_S3_CUSTOM_DOMAIN = (
-                f"{supabase_host}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+                f"{supabase_public_host(supabase_host)}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
             )
 
-    if AWS_S3_ENDPOINT_URL and not os.getenv("AWS_S3_ADDRESSING_STYLE"):
-        AWS_S3_ADDRESSING_STYLE = "path"
+    if not AWS_S3_ENDPOINT_URL:
+        raise ImproperlyConfigured(
+            "AWS_S3_ENDPOINT_URL or SUPABASE_STORAGE_URL must be set when DJANGO_MEDIA_STORAGE=s3."
+        )
+
+    if not AWS_S3_CUSTOM_DOMAIN and "supabase.co/storage/v1/s3" in AWS_S3_ENDPOINT_URL:
+        parsed_s3_endpoint = urlparse(AWS_S3_ENDPOINT_URL)
+        public_host = supabase_public_host(parsed_s3_endpoint.netloc)
+        AWS_S3_CUSTOM_DOMAIN = (
+            f"{public_host}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+        )
+
+    if AWS_S3_CUSTOM_DOMAIN.startswith("http://"):
+        AWS_S3_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN.removeprefix("http://")
+    elif AWS_S3_CUSTOM_DOMAIN.startswith("https://"):
+        AWS_S3_CUSTOM_DOMAIN = AWS_S3_CUSTOM_DOMAIN.removeprefix("https://")
 
     STORAGES["default"] = {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "access_key": AWS_ACCESS_KEY_ID,
+            "secret_key": AWS_SECRET_ACCESS_KEY,
+            "endpoint_url": AWS_S3_ENDPOINT_URL,
+            "region_name": AWS_S3_REGION_NAME,
+            # Supabase S3 requires path-style addressing:
+            # /storage/v1/s3/<bucket>/<key>, not <bucket>.<host>/<key>.
+            "addressing_style": AWS_S3_ADDRESSING_STYLE,
+            "signature_version": AWS_S3_SIGNATURE_VERSION,
             "location": AWS_LOCATION,
-            "file_overwrite": False,
+            "file_overwrite": AWS_S3_FILE_OVERWRITE,
+            # Supabase Storage public buckets do not need object ACL headers.
+            # Keeping this as None avoids ACL-related upload failures.
+            "default_acl": AWS_DEFAULT_ACL,
+            "querystring_auth": AWS_QUERYSTRING_AUTH,
+            "object_parameters": AWS_S3_OBJECT_PARAMETERS,
+            "custom_domain": AWS_S3_CUSTOM_DOMAIN or None,
+            "url_protocol": "https:",
         },
     }
 
+    media_location = f"{AWS_LOCATION}/" if AWS_LOCATION else ""
     if AWS_S3_CUSTOM_DOMAIN:
-        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
-    elif AWS_S3_ENDPOINT_URL:
-        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL.rstrip('/')}/{AWS_STORAGE_BUCKET_NAME}/{AWS_LOCATION}/"
+        MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{media_location}"
+    else:
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/{AWS_STORAGE_BUCKET_NAME}/{media_location}"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
