@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold text-center mb-8 p-4 rounded">
+  Inscrição para {{ corrida.nome }}
+</h1>
+
+<!-- ETAPA 1: Busca por CPF -->
+<div id="etapa-cpf" class="max-w-md mx-auto p-6 bg-white rounded shadow space-y-6">
+  <h2 class="text-xl font-semibold text-gray-700">Digite seu CPF para buscar seus dados</h2>
+
+  <div>
+    <label for="cpf-input" class="block font-medium mb-1">CPF</label>
+    <input
+      type="text"
+      id="cpf-input"
+      name="cpf"
+      placeholder="000.000.000-00"
+      maxlength="14"
+      class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+    />
+  </div>
+
+  <div id="cpf-loading" class="hidden text-center">
+    <span class="inline-block animate-spin text-2xl">&#8987;</span>
+    <span class="ml-2 text-gray-500">Buscando dados...</span>
+  </div>
+
+  <div id="cpf-error" class="hidden bg-red-50 p-3 rounded">
+    <p class="text-red-600 font-medium mb-2"></p>
+    <a href="{% url 'register' %}" class="text-blue-600 hover:underline font-medium">
+      Cadastre-se aqui para se inscrever
+    </a>
+  </div>
+
+  <button
+    id="btn-buscar-cpf"
+    class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full"
+  >
+    Buscar dados
+  </button>
+</div>
+
+<!-- ETAPA 2: Formulário de inscrição (pré-preenchido ou editável) -->
+<div id="etapa-form" style="display: none;" class="max-w-md mx-auto p-6 bg-white rounded shadow space-y-6">
+  <h2 class="text-xl font-semibold text-gray-700">Confirme seus dados para inscrição</h2>
+
+  <form method="post" id="form-inscricao">
+    {% csrf_token %}
+    <input type="hidden" name="cpf" id="cpf-hidden">
+
+    <div>
+      <label for="nome" class="block font-medium mb-1">Nome</label>
+      <input
+        type="text"
+        name="nome"
+        id="nome"
+        required
+        class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+      />
+    </div>
+
+    <div>
+      <label for="data_nascimento" class="block font-medium mb-1">Data de nascimento</label>
+      <input
+        type="date"
+        name="data_nascimento"
+        id="data_nascimento"
+        required
+        class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+      />
+    </div>
+
+    <div>
+      <label for="equipe" class="block font-medium mb-1">Equipe (opcional)</label>
+      <input
+        type="text"
+        name="equipe"
+        id="equipe"
+        class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+      />
+    </div>
+
+    <div>
+      <label for="sexo" class="block font-medium mb-1">Sexo</label>
+      <select
+        name="sexo"
+        id="sexo"
+        required
+        class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+      >
+        <option value="">Selecione</option>
+        <option value="M">Masculino</option>
+        <option value="F">Feminino</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="tamanho_camisa" class="block font-medium mb-1">Tamanho da camisa</label>
+      <select
+        name="tamanho_camisa"
+        id="tamanho_camisa"
+        class="px-3 py-2 rounded w-full border border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200"
+      >
+        <option value="P">P</option>
+        <option value="M" selected>M</option>
+        <option value="G">G</option>
+      </select>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <button type="button" id="btn-voltar" style="width: 100%; background-color: #d1d5db; color: #374151; font-weight: bold; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; margin-bottom: 12px;">
+        Voltar
+      </button>
+      <button type="submit" style="width: 100%; background-color: #16a34a; color: white; font-weight: bold; padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer;">
+        Enviar inscrição
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="text-center mt-4">
+  <a href="{% url 'listar_corridas' %}" class="text-blue-500 hover:underline">
+    Voltar para a lista de corridas
+  </a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const cpfInput = document.getElementById('cpf-input');
+  const btnBuscar = document.getElementById('btn-buscar-cpf');
+  const loading = document.getElementById('cpf-loading');
+  const errorDiv = document.getElementById('cpf-error');
+  const etapaCpf = document.getElementById('etapa-cpf');
+  const etapaForm = document.getElementById('etapa-form');
+  const cpfHidden = document.getElementById('cpf-hidden');
+  const btnVoltar = document.getElementById('btn-voltar');
+
+  // Máscara de CPF
+  cpfInput.addEventListener('input', function (e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length > 11) value = value.slice(0, 11);
+    if (value.length > 9) {
+      value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+    } else if (value.length > 6) {
+      value = value.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (value.length > 3) {
+      value = value.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+    }
+    e.target.value = value;
+  });
+
+  // Validação de CPF
+  function validaCPF(cpf) {
+    cpf = cpf.replace(/\D/g, '');
+    if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += parseInt(cpf.charAt(i)) * (10 - i);
+    let digito1 = 11 - (soma % 11);
+    if (digito1 >= 10) digito1 = 0;
+    if (parseInt(cpf.charAt(9)) !== digito1) return false;
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += parseInt(cpf.charAt(i)) * (11 - i);
+    let digito2 = 11 - (soma % 11);
+    if (digito2 >= 10) digito2 = 0;
+    if (parseInt(cpf.charAt(10)) !== digito2) return false;
+    return true;
+  }
+
+  // Função para mostrar etapa CPF
+  function mostrarEtapaCPF() {
+    etapaCpf.style.display = 'block';
+    etapaForm.style.display = 'none';
+  }
+
+  // Função para mostrar etapa Formulário
+  function mostrarEtapaForm() {
+    etapaCpf.style.display = 'none';
+    etapaForm.style.display = 'block';
+  }
+
+  // Botão voltar
+  btnVoltar.addEventListener('click', function () {
+    mostrarEtapaCPF();
+  });
+
+  // Buscar CPF via AJAX
+  btnBuscar.addEventListener('click', function () {
+    const cpf = cpfInput.value;
+    const cpfLimpo = cpf.replace(/\D/g, '');
+
+    // Esconder mensagens anteriores
+    errorDiv.style.display = 'none';
+
+    if (!validaCPF(cpf)) {
+      errorDiv.querySelector('p').textContent = 'CPF inválido. Verifique os dados digitados.';
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    // Mostrar loading
+    loading.style.display = 'block';
+    btnBuscar.disabled = true;
+
+    fetch('/eventos/buscar-cpf/?cpf=' + encodeURIComponent(cpf), {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(function(res) {
+        return res.json();
+      })
+      .then(function(data) {
+        loading.style.display = 'none';
+        btnBuscar.disabled = false;
+
+        if (data.encontrado) {
+          // Preencher formulário
+          document.getElementById('nome').value = data.nome || '';
+          document.getElementById('data_nascimento').value = data.data_nascimento || '';
+          document.getElementById('equipe').value = data.equipe || '';
+          
+          // Para selects, precisamos selecionar a option correta
+          var selectSexo = document.getElementById('sexo');
+          selectSexo.value = data.sexo || 'M';
+          
+          var selectTamanho = document.getElementById('tamanho_camisa');
+          selectTamanho.value = data.tamanho_camisa || 'M';
+          
+          cpfHidden.value = cpfLimpo;
+
+          // Trocar etapas
+          mostrarEtapaForm();
+        } else {
+          errorDiv.querySelector('p').textContent = data.erro || 'CPF não encontrado.';
+          errorDiv.style.display = 'block';
+        }
+      })
+      .catch(function(err) {
+        loading.style.display = 'none';
+        btnBuscar.disabled = false;
+        errorDiv.querySelector('p').textContent = 'Erro ao buscar CPF. Tente novamente.';
+        errorDiv.style.display = 'block';
+      });
+  });
+});
+</script>
+
+{% endblock %}

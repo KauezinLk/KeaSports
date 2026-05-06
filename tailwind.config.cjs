@@ -1,6 +1,6 @@
 module.exports = {
   content: [
-    "./api_s/templates/**/*.html",
+    "./eventos/templates/**/*.html",
     "./**/templates/**/*.html"
   ],
   theme: {

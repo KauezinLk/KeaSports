@@ -1,15 +1,15 @@
 {
-  "name": "api",
+  "name": "keasports",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:css": "npx @tailwindcss/cli -i input.css -o nome_projeto/static/css/output.css",
-    "dev:css": "npx @tailwindcss/cli -i input.css -o nome_projeto/static/css/output.css --watch"
+    "build:css": "npx @tailwindcss/cli -i input.css -o keasports/static/css/output.css",
+    "dev:css": "npx @tailwindcss/cli -i input.css -o keasports/static/css/output.css --watch"
   },
   "tailwindcss": {
-    "config": "nome_projeto/static/css/tailwind.config.cjs"
+    "config": "keasports/static/css/tailwind.config.cjs"
   },
   "keywords": [],
   "author": "",

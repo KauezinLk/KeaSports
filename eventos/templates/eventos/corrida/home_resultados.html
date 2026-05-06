@@ -1,0 +1,138 @@
+{% if resultados_recentes %}
+
+<div class="relative max-w-6xl mx-auto px-4 sm:px-0">
+  <div class="flex items-center justify-end gap-2 mb-4">
+    <button
+      id="resultados-prev"
+      type="button"
+      class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-700 shadow-md transition hover:bg-gray-100 hover:text-[#E30000]"
+      aria-label="Resultado anterior"
+    >
+      <span class="text-xl leading-none">&larr;</span>
+    </button>
+    <button
+      id="resultados-next"
+      type="button"
+      class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-700 shadow-md transition hover:bg-gray-100 hover:text-[#E30000]"
+      aria-label="Proximo resultado"
+    >
+      <span class="text-xl leading-none">&rarr;</span>
+    </button>
+  </div>
+
+  <div
+    id="resultados-carousel"
+    class="overflow-x-auto scroll-smooth pb-2"
+    style="scrollbar-width: none;"
+  >
+    <div class="flex gap-4 sm:gap-6">
+      {% for arquivo in resultados_recentes %}
+      <div
+        class="min-w-[calc(100%-16px)] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.33%-16px)] bg-white rounded-xl shadow-md hover:shadow-lg transition p-4 flex-shrink-0"
+      >
+        {% if arquivo.imagem %}
+        <img
+          src="{{ arquivo.imagem.url }}"
+          alt="{{ arquivo.nome }}"
+          class="w-full h-44 object-cover rounded-lg mb-3"
+        />
+        {% else %}
+        <div
+          class="w-full h-44 flex items-center justify-center bg-gray-100 rounded-lg mb-3 text-gray-400"
+        >
+          Resultado
+        </div>
+        {% endif %}
+
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">
+          {{ arquivo.nome }}
+        </h3>
+
+        <div class="space-y-2 text-base text-gray-600 mb-4">
+          {% if arquivo.data_corrida %}
+          <p><span class="font-semibold text-gray-700">Data:</span> {{ arquivo.data_corrida }}</p>
+          {% endif %}
+
+          {% if arquivo.local %}
+          <p><span class="font-semibold text-gray-700">Local:</span> {{ arquivo.local }}</p>
+          {% endif %}
+
+          <p><span class="font-semibold text-gray-700">Status:</span> Resultado disponivel</p>
+        </div>
+
+        <a
+          href="{% url 'arquivo_detail' arquivo.pk %}"
+          class="block w-full text-center bg-[#E30000] text-white py-2 rounded-lg hover:bg-red-700 transition font-semibold"
+        >
+          Ver resultados
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div id="resultados-indicadores" class="mt-4 flex justify-center gap-2">
+    {% for arquivo in resultados_recentes %}
+    <button
+      type="button"
+      class="h-2.5 w-2.5 rounded-full bg-gray-300 transition data-[active=true]:bg-[#E30000]"
+      aria-label="Ir para resultado {{ forloop.counter }}"
+      data-index="{{ forloop.counter0 }}"
+      data-active="{% if forloop.first %}true{% else %}false{% endif %}"
+    ></button>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const carousel = document.getElementById("resultados-carousel");
+    const prev = document.getElementById("resultados-prev");
+    const next = document.getElementById("resultados-next");
+    const indicators = Array.from(document.querySelectorAll("#resultados-indicadores button"));
+
+    if (!carousel || !prev || !next) return;
+
+    function getCardWidth() {
+      const firstCard = carousel.querySelector(".flex > div");
+      if (!firstCard) return carousel.clientWidth;
+      const gap = window.innerWidth >= 640 ? 24 : 16;
+      return firstCard.offsetWidth + gap;
+    }
+
+    function updateIndicators() {
+      const index = Math.round(carousel.scrollLeft / getCardWidth());
+      indicators.forEach(function (button, buttonIndex) {
+        button.dataset.active = buttonIndex === index ? "true" : "false";
+      });
+    }
+
+    prev.addEventListener("click", function () {
+      carousel.scrollBy({ left: -getCardWidth(), behavior: "smooth" });
+    });
+
+    next.addEventListener("click", function () {
+      carousel.scrollBy({ left: getCardWidth(), behavior: "smooth" });
+    });
+
+    indicators.forEach(function (button) {
+      button.addEventListener("click", function () {
+        carousel.scrollTo({
+          left: Number(button.dataset.index) * getCardWidth(),
+          behavior: "smooth",
+        });
+      });
+    });
+
+    carousel.addEventListener("scroll", function () {
+      window.requestAnimationFrame(updateIndicators);
+    });
+
+    window.addEventListener("resize", updateIndicators);
+    updateIndicators();
+  });
+</script>
+
+{% else %}
+<p class="text-gray-500 text-center">Nao ha resultados disponiveis.</p>
+{% endif %}

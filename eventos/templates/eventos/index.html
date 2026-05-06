@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero-image relative overflow-hidden rounded-lg bg-white opacity-0 transform translate-y-4 shadow-xl transition-all duration-700 ease-out">
+  <img
+    src="{% static 'imagens/kea-sports-hero.png' %}"
+    alt="Kea Sports"
+    class="h-[430px] w-full object-cover object-center sm:h-auto"
+  />
+
+  <div class="absolute inset-0 bg-gradient-to-r from-yellow-950/55 via-transparent to-transparent"></div>
+  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+  <div class="absolute inset-0 flex items-end px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
+    <div class="max-w-2xl text-white">
+      <h1 class="max-w-xl text-5xl font-black uppercase leading-none text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)] sm:text-6xl md:text-7xl">
+        Kea
+        <span class="block text-[#E30000] drop-shadow-[0_4px_0_rgba(255,255,255,0.85)]">
+          Sports
+        </span>
+      </h1>
+
+      <p class="mt-5 max-w-md border-l-4 border-[#E30000] pl-4 text-base font-bold leading-relaxed text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.65)] sm:text-lg">
+        Encontre as proximas corridas, acompanhe resultados e viva cada prova com energia do inicio ao fim.
+      </p>
+
+      <div
+        class="hero-button mt-6 opacity-0 transform translate-y-4 transition-all duration-700 ease-out"
+        style="transition-delay: 0.3s"
+      >
+        <a
+          href="{% url 'listar_corridas' %}"
+          class="inline-flex w-full items-center justify-center rounded-full bg-[#E30000] px-8 py-4 text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-105 hover:bg-red-700 hover:shadow-xl sm:w-auto sm:text-lg"
+        >
+          Explorar Eventos
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Animacao de entrada -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const heroImage = document.querySelector(".hero-image");
+    const heroButton = document.querySelector(".hero-button");
+
+    setTimeout(function () {
+      if (heroImage) {
+        heroImage.style.opacity = "1";
+        heroImage.style.transform = "translateY(0)";
+      }
+      if (heroButton) {
+        heroButton.style.opacity = "1";
+        heroButton.style.transform = "translateY(0)";
+      }
+    }, 100);
+  });
+</script>
+
+<!-- PROXIMAS CORRIDAS -->
+<section class="mt-12">
+  <h2 class="mb-6 text-center text-xl font-bold tracking-wide text-gray-700 md:text-2xl">
+    Proximas corridas
+  </h2>
+
+  {% include 'eventos/corrida/home_corridas.html' %}
+</section>
+
+<!-- RESULTADOS DAS ULTIMAS CORRIDAS -->
+<section class="mt-12">
+  <h2 class="mb-6 text-center text-xl font-bold tracking-wide text-gray-700 md:text-2xl">
+    Resultados das Ultimas Corridas
+  </h2>
+
+  {% include 'eventos/corrida/home_resultados.html' %}
+</section>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}Kea Sports{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{% static 'css/output.css' %}?v=2" />
+  </head>
+
+  <body class="min-h-screen bg-gray-50 text-gray-900">
+    <header class="fixed left-0 right-0 top-0 z-50 border-b border-gray-200/80 bg-white/95 shadow-sm backdrop-blur">
+      <div class="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <a href="{% url 'index' %}" class="flex min-w-0 items-center gap-3">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-[#E30000] text-lg font-black text-white shadow-md shadow-red-500/25">
+            KS
+          </span>
+          <span class="truncate text-xl font-black tracking-wide text-gray-950 sm:text-2xl">
+            Kea Sports
+          </span>
+        </a>
+
+        <nav class="hidden items-center gap-2 lg:flex">
+          <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
+          <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
+          <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+
+          {% if user.is_authenticated %}
+            <span class="ml-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
+              Ola, {{ user.first_name|default:user.username }}!
+            </span>
+            <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'auth_page' %}">Minha Conta</a>
+            <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
+          {% else %}
+            <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
+            <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'register' %}">Cadastrar-se</a>
+            <a class="rounded-full bg-[#E30000] px-5 py-2 text-sm font-bold text-white shadow-md shadow-red-500/25 transition hover:bg-red-700" href="{% url 'auth_page' %}">Entrar</a>
+          {% endif %}
+        </nav>
+
+        <button
+          type="button"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-900 shadow-sm transition hover:border-red-200 hover:bg-red-50 lg:hidden"
+          aria-label="Abrir menu"
+          aria-controls="mobileMenu"
+          aria-expanded="false"
+          onclick="toggleMobileMenu()"
+        >
+          <span class="flex w-5 flex-col gap-1.5">
+            <span class="h-0.5 rounded-full bg-current"></span>
+            <span class="h-0.5 rounded-full bg-current"></span>
+            <span class="h-0.5 rounded-full bg-current"></span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <div
+      id="mobileMenu"
+      class="hidden fixed inset-0 z-[60] bg-black/50 lg:hidden"
+      onclick="closeMobileMenu()"
+    >
+      <aside
+        class="absolute right-0 top-0 flex h-full w-full max-w-sm flex-col bg-white shadow-2xl"
+        onclick="event.stopPropagation()"
+      >
+        <div class="flex h-[72px] items-center justify-between border-b border-gray-200 px-5">
+          <span class="text-lg font-black text-gray-950">Menu</span>
+          <button
+            type="button"
+            class="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-2xl leading-none text-gray-700 transition hover:bg-gray-100"
+            aria-label="Fechar menu"
+            onclick="closeMobileMenu()"
+          >
+            &times;
+          </button>
+        </div>
+
+        <nav class="flex flex-1 flex-col gap-2 overflow-y-auto p-5 text-base font-bold">
+          <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
+          <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
+          <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+          <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
+
+          {% if user.is_authenticated %}
+            <div class="mt-3 rounded-lg bg-gray-100 px-4 py-3 text-sm text-gray-700">
+              Ola, <strong>{{ user.first_name|default:user.username }}</strong>!
+            </div>
+            <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'auth_page' %}">Minha Conta</a>
+          {% else %}
+            <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'register' %}">Cadastrar-se</a>
+            <a class="mt-2 rounded-lg bg-[#E30000] px-4 py-3 text-center text-white shadow-md shadow-red-500/25 transition hover:bg-red-700" href="{% url 'auth_page' %}">Entrar</a>
+          {% endif %}
+        </nav>
+      </aside>
+    </div>
+
+    <main class="min-h-screen px-4 pb-12 pt-24 sm:px-6 md:px-10 lg:px-14">
+      {% block content %}{% endblock content %}
+    </main>
+
+    <footer class="border-t border-gray-800 bg-gray-950 text-white">
+      <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr] lg:px-8">
+        <div>
+          <a href="{% url 'index' %}" class="inline-flex items-center gap-3">
+            <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-[#E30000] text-lg font-black text-white shadow-md shadow-red-500/25">
+              KS
+            </span>
+            <span class="text-2xl font-black tracking-wide">Kea Sports</span>
+          </a>
+
+          <p class="mt-4 max-w-md text-sm font-medium leading-relaxed text-gray-300">
+            Eventos, inscricoes e resultados de corrida com uma experiencia simples, rapida e organizada.
+          </p>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-black uppercase tracking-wide text-white">Navegacao</h2>
+          <nav class="mt-4 flex flex-col gap-2 text-sm font-medium text-gray-300">
+            <a class="transition hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
+            <a class="transition hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
+            <a class="transition hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+            <a class="transition hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
+          </nav>
+        </div>
+
+        <div>
+          <h2 class="text-sm font-black uppercase tracking-wide text-white">Atendimento</h2>
+          <p class="mt-4 text-sm font-medium leading-relaxed text-gray-300">
+            Para informacoes sobre corridas, inscricoes ou resultados, entre em contato com a organizacao do evento.
+          </p>
+          <a
+            href="{% url 'auth_page' %}"
+            class="mt-4 inline-flex rounded-full bg-[#E30000] px-5 py-2 text-sm font-bold text-white shadow-md shadow-red-500/20 transition hover:bg-red-700"
+          >
+            Minha Conta
+          </a>
+        </div>
+      </div>
+
+      <div class="border-t border-white/10 px-4 py-4">
+        <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-center text-xs font-medium text-gray-400 sm:flex-row">
+          <p>2026 Kea Sports. Todos os direitos reservados.</p>
+          <p>Desenvolvido para gestao de eventos esportivos.</p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      function toggleMobileMenu() {
+        const menu = document.getElementById("mobileMenu");
+        const button = document.querySelector("[aria-controls='mobileMenu']");
+
+        menu.classList.toggle("hidden");
+        button.setAttribute("aria-expanded", menu.classList.contains("hidden") ? "false" : "true");
+      }
+
+      function closeMobileMenu() {
+        const menu = document.getElementById("mobileMenu");
+        const button = document.querySelector("[aria-controls='mobileMenu']");
+
+        menu.classList.add("hidden");
+        button.setAttribute("aria-expanded", "false");
+      }
+    </script>
+  </body>
+</html>

@@ -48,6 +48,7 @@ htmlcov/
 # Env / Secrets
 .env
 .env.*
+!.env.example
 .env.local
 .env.production
 .env.dev
@@ -69,6 +70,7 @@ cache/
 # Backups
 backup/
 backups/
+.codex_backups/
 
 # Temporários
 *.tmp

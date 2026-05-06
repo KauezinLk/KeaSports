@@ -1,3 +1,3 @@
 @import "tailwindcss";
-@source "./api_s/templates/**/*.html";
+@source "./eventos/templates/**/*.html";
 @source "./**/templates/**/*.html";

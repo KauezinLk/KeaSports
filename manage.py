@@ -4,7 +4,7 @@ import sys
 
 def main():
   
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nome_projeto.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'keasports.settings')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
