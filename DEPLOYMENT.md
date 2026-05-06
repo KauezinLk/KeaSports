@@ -1,55 +1,115 @@
-# Deploy em producao
+# Deploy do KeaSports no Render
+
+Este projeto esta preparado para rodar no Render com Django, PostgreSQL, Gunicorn e WhiteNoise.
+
+## Comandos do Render
+
+Use estes comandos no Web Service:
+
+```bash
+bash build.sh
+```
+
+```bash
+python manage.py migrate --noinput && gunicorn keasports.wsgi:application --bind 0.0.0.0:$PORT --workers ${WEB_CONCURRENCY:-2} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120} --access-logfile - --error-logfile -
+```
+
+O primeiro e o **Build Command**. O segundo e o **Start Command**.
+
+## Passo a passo
+
+1. Suba o projeto para o GitHub.
+2. No Render, crie um **New Web Service** a partir do repositorio.
+3. Escolha runtime **Python** e plano **Free** para comecar.
+4. Configure o Build Command:
+
+```bash
+bash build.sh
+```
+
+5. Configure o Start Command:
+
+```bash
+python manage.py migrate --noinput && gunicorn keasports.wsgi:application --bind 0.0.0.0:$PORT --workers ${WEB_CONCURRENCY:-2} --threads ${GUNICORN_THREADS:-2} --timeout ${GUNICORN_TIMEOUT:-120} --access-logfile - --error-logfile -
+```
+
+6. Crie um banco PostgreSQL. Pode ser Render PostgreSQL, Neon, Supabase ou outro provedor compativel.
+7. Adicione as variaveis de ambiente abaixo.
+8. Faca o deploy.
+9. Depois do deploy, crie o superusuario pelo Shell do Render.
 
 ## Variaveis obrigatorias
 
-Copie `.env.example` para o ambiente da hospedagem e configure:
+Configure no Render:
 
-- `DJANGO_SECRET_KEY`
-- `DJANGO_DEBUG=False`
-- `DJANGO_ALLOWED_HOSTS`
-- `DJANGO_CSRF_TRUSTED_ORIGINS`
-- `DJANGO_ADMIN_URL`
-- `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
+```text
+DJANGO_DEBUG=False
+DJANGO_SECRET_KEY=uma-chave-segura-e-longa
+DJANGO_ADMIN_URL=admin-seguro/
+DATABASE_URL=postgresql://usuario:senha@host:5432/banco
+DJANGO_MEDIA_STORAGE=local
+WEB_CONCURRENCY=2
+GUNICORN_THREADS=2
+GUNICORN_TIMEOUT=120
+```
 
-Nunca suba `.env` para o Git.
+O Render define `RENDER_EXTERNAL_HOSTNAME` automaticamente. O projeto usa essa variavel para liberar o host em `ALLOWED_HOSTS` e `CSRF_TRUSTED_ORIGINS`.
 
-## Comandos de release
+Se usar dominio proprio, adicione tambem:
+
+```text
+DJANGO_ALLOWED_HOSTS=seudominio.onrender.com,seudominio.com,www.seudominio.com
+DJANGO_CSRF_TRUSTED_ORIGINS=https://seudominio.onrender.com,https://seudominio.com,https://www.seudominio.com
+```
+
+## Banco de dados
+
+O projeto prefere `DATABASE_URL` em producao. Se `DATABASE_URL` existir, ela sobrescreve as variaveis `DB_*`.
+
+Variaveis alternativas:
+
+```text
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=nome_do_banco
+DB_USER=usuario
+DB_PASSWORD=senha
+DB_HOST=host
+DB_PORT=5432
+DB_CONN_MAX_AGE=60
+DB_SSL_REQUIRE=False
+```
+
+Use `DB_SSL_REQUIRE=True` apenas quando o provedor exigir SSL na conexao.
+
+## Arquivos estaticos
+
+O build executa:
 
 ```bash
-pip install -r requirements-production.txt
 npm ci
 npm run build:css
-python manage.py migrate
 python manage.py collectstatic --noinput
-python manage.py check --deploy
 ```
 
-## Servidor
+O Django serve os arquivos de `/static/` com WhiteNoise em producao. O CSS gerado fica em:
 
-Use um servidor WSGI em producao, como Gunicorn, atras de Nginx ou do proxy da plataforma:
-
-```bash
-gunicorn keasports.wsgi:application
+```text
+keasports/static/css/output.css
 ```
 
-O projeto usa WhiteNoise para servir `/static/` em producao. Se usar VPS com Nginx, voce tambem pode servir `staticfiles/` diretamente pelo Nginx.
+E o `collectstatic` publica tudo em:
 
-Configure o proxy ou a plataforma para tratar:
-
-- `/static/` a partir de `staticfiles/`
-- `/media/` a partir de um storage persistente. Em Render/Railway, prefira S3, Cloudinary, Supabase Storage ou volume persistente.
-
-## Media/uploads persistente
-
-Por padrao, o projeto usa armazenamento local em desenvolvimento:
-
-```bash
-DJANGO_MEDIA_STORAGE=local
+```text
+staticfiles/
 ```
 
-Em producao, configure um storage S3 compativel:
+## Media e uploads
 
-```bash
+Com `DJANGO_MEDIA_STORAGE=local`, uploads funcionam no Render Free, mas o disco do servico web e efemero. Arquivos enviados podem sumir em redeploys, restarts ou novas instancias.
+
+Para producao real, use storage S3 compativel:
+
+```text
 DJANGO_MEDIA_STORAGE=s3
 AWS_STORAGE_BUCKET_NAME=seu-bucket
 AWS_ACCESS_KEY_ID=sua-chave
@@ -59,40 +119,69 @@ AWS_LOCATION=media
 AWS_QUERYSTRING_AUTH=False
 ```
 
-Para Supabase Storage, Cloudflare R2 ou MinIO, adicione tambem:
+Para Cloudflare R2, Supabase Storage ou MinIO, adicione:
 
-```bash
+```text
 AWS_S3_ENDPOINT_URL=https://seu-endpoint-s3
 ```
 
-Se usar dominio/CDN proprio para os uploads:
+Se usar CDN/dominio proprio:
 
-```bash
+```text
 AWS_S3_CUSTOM_DOMAIN=cdn.seudominio.com
 ```
 
-O bucket precisa permitir leitura publica dos arquivos de media, ou voce deve mudar `AWS_QUERYSTRING_AUTH=True` e servir URLs assinadas.
+## Django Admin
 
-## Start command
+O admin usa a rota configurada em:
 
-```bash
-gunicorn keasports.wsgi:application --bind 0.0.0.0:$PORT
+```text
+DJANGO_ADMIN_URL=admin-seguro/
 ```
 
-## Observacoes importantes
+Depois do deploy, abra o Shell do Render e rode:
 
-- Nao use o disco efemero da plataforma para uploads permanentes.
-- Rode `npm audit` e `pip install -r requirements-production.txt` antes de cada release.
-- O app label Django ainda e `api_s` por compatibilidade com as migrations antigas.
-- `Participante` representa a pessoa. `Inscricao` representa o vinculo entre participante e corrida, permitindo multiplas inscricoes por CPF.
+```bash
+python manage.py createsuperuser
+```
 
-## Antes de publicar
+Se preferir criar via comando unico:
 
-- Gere uma nova `DJANGO_SECRET_KEY`.
-- Use banco PostgreSQL de producao, separado do desenvolvimento.
-- Crie um superusuario com senha forte.
-- Altere `DJANGO_ADMIN_URL`.
-- Ative HTTPS.
-- Rode `python manage.py check --deploy`.
-- Rode `npm audit`.
-- Teste cadastro, login, inscricao, resultados e upload de Excel em staging.
+```bash
+DJANGO_SUPERUSER_USERNAME=admin DJANGO_SUPERUSER_EMAIL=admin@seudominio.com DJANGO_SUPERUSER_PASSWORD='senha-forte-aqui' python manage.py createsuperuser --noinput
+```
+
+## Seguranca de producao
+
+Em `DEBUG=False`, o projeto ativa:
+
+- cookies seguros para sessao e CSRF;
+- redirecionamento HTTPS;
+- `SECURE_PROXY_SSL_HEADER` para o proxy do Render;
+- HSTS;
+- `X_FRAME_OPTIONS=DENY`;
+- `SECURE_CONTENT_TYPE_NOSNIFF=True`;
+- `REFERRER_POLICY=same-origin`;
+- URL do admin por variavel de ambiente.
+
+## Verificacao local antes do deploy
+
+No PowerShell:
+
+```powershell
+cd "C:\Users\bueno\OneDrive\Desktop\KeaSports"
+.\.venv\Scripts\Activate.ps1
+$env:DJANGO_DEBUG="True"
+$env:DJANGO_SECRET_KEY="local-test-key"
+$env:DJANGO_ALLOWED_HOSTS="127.0.0.1,localhost"
+python manage.py check
+npm run build:css
+python manage.py collectstatic --noinput
+```
+
+## Observacoes
+
+- Nao suba `.env` para o GitHub.
+- Nao use SQLite em producao.
+- Para ate cerca de 300 usuarios simultaneos no inicio, use PostgreSQL externo, `WEB_CONCURRENCY=2`, `GUNICORN_THREADS=2`, cache/CDN quando possivel e storage externo para media.
+- O app Django ainda usa `label = "api_s"` por compatibilidade com migrations antigas. Isso nao impede o deploy.

@@ -3,6 +3,11 @@ from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
 
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -19,8 +24,24 @@ def env_list(name, default=""):
     return [item.strip() for item in value.split(",") if item.strip()]
 
 
+def env_int(name, default):
+    value = os.getenv(name)
+    if value in (None, ""):
+        return default
+    return int(value)
+
+
+def unique_list(items):
+    result = []
+    for item in items:
+        if item and item not in result:
+            result.append(item)
+    return result
+
+
 DEBUG = env_bool("DJANGO_DEBUG", False)
 MEDIA_STORAGE = os.getenv("DJANGO_MEDIA_STORAGE", "local").strip().lower()
+RENDER_EXTERNAL_HOSTNAME = os.getenv("RENDER_EXTERNAL_HOSTNAME", "").strip()
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
@@ -33,10 +54,16 @@ ALLOWED_HOSTS = env_list(
     "DJANGO_ALLOWED_HOSTS",
     "127.0.0.1,localhost" if DEBUG else "",
 )
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+ALLOWED_HOSTS = unique_list(ALLOWED_HOSTS)
 if not DEBUG and not ALLOWED_HOSTS:
     raise ImproperlyConfigured("DJANGO_ALLOWED_HOSTS must be set in production.")
 
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS")
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_EXTERNAL_HOSTNAME}")
+CSRF_TRUSTED_ORIGINS = unique_list(CSRF_TRUSTED_ORIGINS)
 
 
 INSTALLED_APPS = [
@@ -86,20 +113,36 @@ TEMPLATES = [
 WSGI_APPLICATION = "keasports.wsgi.application"
 
 
-DATABASES = {
-    "default": {
-        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.postgresql"),
-        "NAME": os.getenv("DB_NAME", "KeaBase" if DEBUG else ""),
-        "USER": os.getenv("DB_USER", "postgres" if DEBUG else ""),
-        "PASSWORD": os.getenv("DB_PASSWORD", ""),
-        "HOST": os.getenv("DB_HOST", "localhost" if DEBUG else ""),
-        "PORT": os.getenv("DB_PORT", "5433" if DEBUG else ""),
-        "CONN_MAX_AGE": int(os.getenv("DB_CONN_MAX_AGE", "60")),
-    }
-}
+DB_CONN_MAX_AGE = env_int("DB_CONN_MAX_AGE", 60)
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DEBUG and not DATABASES["default"]["NAME"]:
-    raise ImproperlyConfigured("DB_NAME must be set in production.")
+if DATABASE_URL:
+    if dj_database_url is None:
+        raise ImproperlyConfigured("dj-database-url must be installed to use DATABASE_URL.")
+
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=DB_CONN_MAX_AGE,
+            conn_health_checks=True,
+            ssl_require=env_bool("DB_SSL_REQUIRE", False),
+        )
+    }
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.postgresql"),
+            "NAME": os.getenv("DB_NAME", "KeaBase" if DEBUG else ""),
+            "USER": os.getenv("DB_USER", "postgres" if DEBUG else ""),
+            "PASSWORD": os.getenv("DB_PASSWORD", ""),
+            "HOST": os.getenv("DB_HOST", "localhost" if DEBUG else ""),
+            "PORT": os.getenv("DB_PORT", "5433" if DEBUG else ""),
+            "CONN_MAX_AGE": DB_CONN_MAX_AGE,
+            "CONN_HEALTH_CHECKS": True,
+        }
+    }
+
+    if not DEBUG and not DATABASES["default"]["NAME"]:
+        raise ImproperlyConfigured("DB_NAME or DATABASE_URL must be set in production.")
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -189,6 +232,8 @@ REST_FRAMEWORK = {
 
 
 ADMIN_URL = os.getenv("DJANGO_ADMIN_URL", "admin/" if DEBUG else "")
+if ADMIN_URL and not ADMIN_URL.endswith("/"):
+    ADMIN_URL = f"{ADMIN_URL}/"
 if not DEBUG and not ADMIN_URL:
     raise ImproperlyConfigured("DJANGO_ADMIN_URL must be set in production.")
 
@@ -200,15 +245,16 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False
 SECURE_SSL_REDIRECT = env_bool("DJANGO_SECURE_SSL_REDIRECT", not DEBUG)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = env_bool("DJANGO_USE_X_FORWARDED_HOST", True)
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "31536000" if not DEBUG else "0"))
+SECURE_HSTS_SECONDS = env_int("DJANGO_SECURE_HSTS_SECONDS", 31536000 if not DEBUG else 0)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = env_bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", False)
 SECURE_HSTS_PRELOAD = env_bool("DJANGO_SECURE_HSTS_PRELOAD", False)
 X_FRAME_OPTIONS = "DENY"
 REFERRER_POLICY = "same-origin"
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", str(10 * 1024 * 1024)))
-FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.getenv("DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE", str(5 * 1024 * 1024)))
+DATA_UPLOAD_MAX_MEMORY_SIZE = env_int("DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE", 10 * 1024 * 1024)
+FILE_UPLOAD_MAX_MEMORY_SIZE = env_int("DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE", 5 * 1024 * 1024)
 
 
 LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")

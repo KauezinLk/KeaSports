@@ -41,7 +41,8 @@ def extrair_dados_excel(sender, instance, created, **kwargs):
         return
 
     try:
-        df = pd.read_excel(instance.arquivo.path)
+        with instance.arquivo.open("rb") as arquivo:
+            df = pd.read_excel(arquivo)
         df.columns = df.columns.str.strip()
 
         missing_columns = REQUIRED_COLUMNS - set(df.columns)
