@@ -1,29 +1,29 @@
 {% if resultados_recentes %}
 
-<div class="relative max-w-6xl mx-auto px-4 sm:px-0">
+<div class="relative max-w-6xl mx-auto px-4 sm:px-0" data-carousel>
   <div class="flex items-center justify-end gap-2 mb-4">
     <button
-      id="resultados-prev"
       type="button"
       class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-700 shadow-md transition hover:bg-gray-100 hover:text-[#E30000]"
       aria-label="Resultado anterior"
+      data-carousel-prev
     >
       <span class="text-xl leading-none">&larr;</span>
     </button>
     <button
-      id="resultados-next"
       type="button"
       class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-gray-700 shadow-md transition hover:bg-gray-100 hover:text-[#E30000]"
       aria-label="Proximo resultado"
+      data-carousel-next
     >
       <span class="text-xl leading-none">&rarr;</span>
     </button>
   </div>
 
   <div
-    id="resultados-carousel"
     class="overflow-x-auto scroll-smooth pb-2"
     style="scrollbar-width: none;"
+    data-carousel-track
   >
     <div class="flex gap-4 sm:gap-6">
       {% for arquivo in resultados_recentes %}
@@ -71,7 +71,7 @@
     </div>
   </div>
 
-  <div id="resultados-indicadores" class="mt-4 flex justify-center gap-2">
+  <div class="mt-4 flex justify-center gap-2" data-carousel-indicators>
     {% for arquivo in resultados_recentes %}
     <button
       type="button"
@@ -83,55 +83,6 @@
     {% endfor %}
   </div>
 </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const carousel = document.getElementById("resultados-carousel");
-    const prev = document.getElementById("resultados-prev");
-    const next = document.getElementById("resultados-next");
-    const indicators = Array.from(document.querySelectorAll("#resultados-indicadores button"));
-
-    if (!carousel || !prev || !next) return;
-
-    function getCardWidth() {
-      const firstCard = carousel.querySelector(".flex > div");
-      if (!firstCard) return carousel.clientWidth;
-      const gap = window.innerWidth >= 640 ? 24 : 16;
-      return firstCard.offsetWidth + gap;
-    }
-
-    function updateIndicators() {
-      const index = Math.round(carousel.scrollLeft / getCardWidth());
-      indicators.forEach(function (button, buttonIndex) {
-        button.dataset.active = buttonIndex === index ? "true" : "false";
-      });
-    }
-
-    prev.addEventListener("click", function () {
-      carousel.scrollBy({ left: -getCardWidth(), behavior: "smooth" });
-    });
-
-    next.addEventListener("click", function () {
-      carousel.scrollBy({ left: getCardWidth(), behavior: "smooth" });
-    });
-
-    indicators.forEach(function (button) {
-      button.addEventListener("click", function () {
-        carousel.scrollTo({
-          left: Number(button.dataset.index) * getCardWidth(),
-          behavior: "smooth",
-        });
-      });
-    });
-
-    carousel.addEventListener("scroll", function () {
-      window.requestAnimationFrame(updateIndicators);
-    });
-
-    window.addEventListener("resize", updateIndicators);
-    updateIndicators();
-  });
-</script>
 
 {% else %}
 <p class="text-gray-500 text-center">Nao ha resultados disponiveis.</p>

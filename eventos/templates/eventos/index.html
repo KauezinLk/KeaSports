@@ -5,39 +5,70 @@
 
 {% block content %}
 <!-- HERO SECTION -->
-<section class="hero-image relative overflow-hidden rounded-lg bg-white opacity-0 transform translate-y-4 shadow-xl transition-all duration-700 ease-out">
+<section class="hero-image relative isolate overflow-hidden rounded-[1.35rem] bg-black opacity-0 transform translate-y-4 shadow-[0_18px_45px_rgba(15,23,42,0.22)] transition-all duration-700 ease-out">
   <img
-    src="{% static 'imagens/kea-sports-hero.png' %}"
+    src="{% static 'imagens/kea-sports-runner-hero.png' %}"
     alt="Kea Sports"
-    class="h-[430px] w-full object-cover object-center sm:h-auto"
+    class="h-[500px] w-full object-cover object-right sm:h-[560px] md:h-[520px] lg:h-[560px]"
   />
 
-  <div class="absolute inset-0 bg-gradient-to-r from-yellow-950/55 via-transparent to-transparent"></div>
-  <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+  <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,12,0.98)_0%,rgba(2,6,12,0.9)_34%,rgba(2,6,12,0.38)_68%,rgba(2,6,12,0.08)_100%)]"></div>
+  <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/82 via-black/38 to-transparent"></div>
 
-  <div class="absolute inset-0 flex items-end px-4 py-5 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
-    <div class="max-w-2xl text-white">
-      <h1 class="max-w-xl text-5xl font-black uppercase leading-none text-white drop-shadow-[0_6px_18px_rgba(0,0,0,0.55)] sm:text-6xl md:text-7xl">
-        Kea
-        <span class="block text-[#E30000] drop-shadow-[0_4px_0_rgba(255,255,255,0.85)]">
-          Sports
-        </span>
+  <div class="absolute inset-0 flex flex-col justify-between px-6 py-7 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
+    <div class="max-w-[17rem] sm:max-w-sm">
+      <div class="mb-6 h-1 w-12 rounded-full bg-[#E30000] shadow-[0_0_18px_rgba(227,0,0,0.45)] sm:mb-7 sm:w-16"></div>
+
+      <h1 class="text-[2.75rem] font-black leading-[0.98] tracking-[-0.03em] text-white drop-shadow-[0_8px_24px_rgba(0,0,0,0.65)] sm:text-6xl">
+        Kea Sports
       </h1>
 
-      <p class="mt-5 max-w-md border-l-4 border-[#E30000] pl-4 text-base font-bold leading-relaxed text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.65)] sm:text-lg">
-        Encontre as proximas corridas, acompanhe resultados e viva cada prova com energia do inicio ao fim.
+      <p class="mt-6 max-w-[15rem] text-[1.08rem] font-medium leading-relaxed text-white/72 sm:max-w-xs sm:text-2xl">
+        Eventos, inscrições e rankings em um só lugar.
       </p>
 
       <div
-        class="hero-button mt-6 opacity-0 transform translate-y-4 transition-all duration-700 ease-out"
+        class="hero-button mt-7 opacity-0 transform translate-y-4 transition-all duration-700 ease-out"
         style="transition-delay: 0.3s"
       >
         <a
           href="{% url 'listar_corridas' %}"
-          class="inline-flex w-full items-center justify-center rounded-full bg-[#E30000] px-8 py-4 text-base font-black uppercase tracking-wide text-white shadow-lg shadow-red-500/30 transition-all duration-300 hover:scale-105 hover:bg-red-700 hover:shadow-xl sm:w-auto sm:text-lg"
+          class="inline-flex items-center justify-center gap-2.5 rounded-xl bg-[#E30000] px-5 py-3.5 text-sm font-black text-white shadow-[0_15px_30px_rgba(227,0,0,0.36)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-red-700 hover:shadow-[0_20px_38px_rgba(227,0,0,0.42)] sm:px-7 sm:py-4 sm:text-base"
         >
-          Explorar Eventos
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M8 2v4M16 2v4M3.5 9.5h17M6.5 5h11A2.5 2.5 0 0 1 20 7.5v10A2.5 2.5 0 0 1 17.5 20h-11A2.5 2.5 0 0 1 4 17.5v-10A2.5 2.5 0 0 1 6.5 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <path d="M8 13h.01M12 13h.01M16 13h.01M8 16.5h.01M12 16.5h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+          </svg>
+          Explorar eventos
         </a>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-2.5 sm:max-w-[37rem] sm:gap-6">
+      <div class="min-w-0 pr-2 sm:pr-5">
+        <svg class="mb-2 h-5 w-5 text-[#E30000] sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3 class="text-[0.78rem] font-black leading-tight text-white sm:text-base">Compita</h3>
+        <p class="mt-1 text-[0.68rem] font-medium leading-snug text-white/68 sm:text-sm">Supere seus limites</p>
+      </div>
+
+      <div class="min-w-0 border-l border-white/16 px-2.5 sm:px-5">
+        <svg class="mb-2 h-5 w-5 text-[#E30000] sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M16 19v-1.5A3.5 3.5 0 0 0 12.5 14h-5A3.5 3.5 0 0 0 4 17.5V19M10 10.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM20 19v-1.5a3.5 3.5 0 0 0-2.2-3.25M15.5 3.75a3.5 3.5 0 0 1 0 6.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h3 class="text-[0.78rem] font-black leading-tight text-white sm:text-base">Conecte-se</h3>
+        <p class="mt-1 text-[0.68rem] font-medium leading-snug text-white/68 sm:text-sm">Com a comunidade de corredores</p>
+      </div>
+
+      <div class="min-w-0 border-l border-white/16 pl-2.5 sm:pl-5">
+        <svg class="mb-2 h-5 w-5 text-[#E30000] sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 19V11M12 19V5M19 19v-8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+          <path d="M4 19h16" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+        </svg>
+        <h3 class="text-[0.78rem] font-black leading-tight text-white sm:text-base">Evolua</h3>
+        <p class="mt-1 text-[0.68rem] font-medium leading-snug text-white/68 sm:text-sm">Acompanhe seus resultados</p>
       </div>
     </div>
   </div>
@@ -63,7 +94,7 @@
 </script>
 
 <!-- PROXIMAS CORRIDAS -->
-<section class="mt-12">
+<section class="mt-20 sm:mt-24">
   <h2 class="mb-6 text-center text-xl font-bold tracking-wide text-gray-700 md:text-2xl">
     Proximas corridas
   </h2>
@@ -79,4 +110,63 @@
 
   {% include 'eventos/corrida/home_resultados.html' %}
 </section>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const carousels = Array.from(document.querySelectorAll("[data-carousel]"));
+
+    carousels.forEach(function (root) {
+      const track = root.querySelector("[data-carousel-track]");
+      const prev = root.querySelector("[data-carousel-prev]");
+      const next = root.querySelector("[data-carousel-next]");
+      const indicators = Array.from(root.querySelectorAll("[data-carousel-indicators] button"));
+
+      if (!track || !prev || !next) return;
+
+      function getCardWidth() {
+        const firstCard = track.querySelector(".flex > div");
+        if (!firstCard) return track.clientWidth;
+
+        const row = firstCard.parentElement;
+        const styles = window.getComputedStyle(row);
+        const gap = parseFloat(styles.columnGap || styles.gap || "0");
+
+        return firstCard.offsetWidth + gap;
+      }
+
+      function updateIndicators() {
+        const cardWidth = getCardWidth();
+        const index = cardWidth ? Math.round(track.scrollLeft / cardWidth) : 0;
+
+        indicators.forEach(function (button, buttonIndex) {
+          button.dataset.active = buttonIndex === index ? "true" : "false";
+        });
+      }
+
+      prev.addEventListener("click", function () {
+        track.scrollBy({ left: -getCardWidth(), behavior: "smooth" });
+      });
+
+      next.addEventListener("click", function () {
+        track.scrollBy({ left: getCardWidth(), behavior: "smooth" });
+      });
+
+      indicators.forEach(function (button) {
+        button.addEventListener("click", function () {
+          track.scrollTo({
+            left: Number(button.dataset.index) * getCardWidth(),
+            behavior: "smooth",
+          });
+        });
+      });
+
+      track.addEventListener("scroll", function () {
+        window.requestAnimationFrame(updateIndicators);
+      });
+
+      window.addEventListener("resize", updateIndicators);
+      updateIndicators();
+    });
+  });
+</script>
 {% endblock %}
