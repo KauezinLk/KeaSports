@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -196,6 +197,7 @@ if MEDIA_STORAGE == "s3":
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME")
+    SUPABASE_STORAGE_URL = os.getenv("SUPABASE_STORAGE_URL", "").strip().rstrip("/")
     AWS_S3_ENDPOINT_URL = os.getenv("AWS_S3_ENDPOINT_URL")
     AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_S3_CUSTOM_DOMAIN")
     AWS_LOCATION = os.getenv("AWS_LOCATION", "media")
@@ -204,6 +206,20 @@ if MEDIA_STORAGE == "s3":
     AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": os.getenv("AWS_S3_CACHE_CONTROL", "max-age=86400"),
     }
+
+    if SUPABASE_STORAGE_URL:
+        parsed_supabase_url = urlparse(SUPABASE_STORAGE_URL)
+        supabase_host = parsed_supabase_url.netloc or parsed_supabase_url.path
+
+        if not AWS_S3_ENDPOINT_URL:
+            AWS_S3_ENDPOINT_URL = f"https://{supabase_host}/storage/v1/s3"
+        if not AWS_S3_CUSTOM_DOMAIN:
+            AWS_S3_CUSTOM_DOMAIN = (
+                f"{supabase_host}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+            )
+
+    if AWS_S3_ENDPOINT_URL and not os.getenv("AWS_S3_ADDRESSING_STYLE"):
+        AWS_S3_ADDRESSING_STYLE = "path"
 
     STORAGES["default"] = {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",

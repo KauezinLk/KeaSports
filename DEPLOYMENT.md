@@ -47,7 +47,11 @@ DJANGO_DEBUG=False
 DJANGO_SECRET_KEY=uma-chave-segura-e-longa
 DJANGO_ADMIN_URL=admin-seguro/
 DATABASE_URL=postgresql://usuario:senha@host:5432/banco
-DJANGO_MEDIA_STORAGE=local
+DJANGO_MEDIA_STORAGE=s3
+AWS_STORAGE_BUCKET_NAME=seu-bucket
+AWS_ACCESS_KEY_ID=sua-chave-s3
+AWS_SECRET_ACCESS_KEY=sua-chave-s3-secreta
+SUPABASE_STORAGE_URL=https://seu-projeto.supabase.co
 WEB_CONCURRENCY=2
 GUNICORN_THREADS=2
 GUNICORN_TIMEOUT=120
@@ -105,9 +109,30 @@ staticfiles/
 
 ## Media e uploads
 
-Com `DJANGO_MEDIA_STORAGE=local`, uploads funcionam no Render Free, mas o disco do servico web e efemero. Arquivos enviados podem sumir em redeploys, restarts ou novas instancias.
+Nao use `DJANGO_MEDIA_STORAGE=local` em producao no Render. O banco salva o caminho do arquivo, mas o arquivo fica no disco efemero do servico web e a rota `/media/` nao e servida com `DEBUG=False`. O resultado comum e imagem cadastrada no admin/banco, mas quebrada no site com URL `/media/...`.
 
-Para producao real, use storage S3 compativel:
+Para producao, use storage externo. Como o banco ja esta no Supabase, a opcao mais simples e Supabase Storage com S3:
+
+```text
+DJANGO_MEDIA_STORAGE=s3
+AWS_STORAGE_BUCKET_NAME=seu-bucket-publico
+AWS_ACCESS_KEY_ID=sua-chave-s3-do-supabase
+AWS_SECRET_ACCESS_KEY=sua-chave-s3-secreta-do-supabase
+AWS_S3_REGION_NAME=sa-east-1
+SUPABASE_STORAGE_URL=https://seu-projeto.supabase.co
+AWS_LOCATION=media
+AWS_QUERYSTRING_AUTH=False
+```
+
+O bucket precisa permitir leitura publica se `AWS_QUERYSTRING_AUTH=False`. Com `SUPABASE_STORAGE_URL`, o projeto deriva automaticamente:
+
+```text
+AWS_S3_ENDPOINT_URL=https://seu-projeto.supabase.co/storage/v1/s3
+AWS_S3_CUSTOM_DOMAIN=seu-projeto.supabase.co/storage/v1/object/public/seu-bucket-publico
+```
+
+Se preferir configurar manualmente S3 compativel:
+
 
 ```text
 DJANGO_MEDIA_STORAGE=s3

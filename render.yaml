@@ -15,7 +15,21 @@ services:
       - key: DJANGO_ADMIN_URL
         generateValue: true
       - key: DJANGO_MEDIA_STORAGE
-        value: local
+        value: s3
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_URL
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      - key: AWS_LOCATION
+        value: media
+      - key: AWS_QUERYSTRING_AUTH
+        value: "False"
       - key: DB_CONN_MAX_AGE
         value: "60"
       - key: DJANGO_SECURE_SSL_REDIRECT
