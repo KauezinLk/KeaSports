@@ -1,5 +1,8 @@
 --> Comando para atualizações: $env:DJANGO_SECRET_KEY='local-test-key'; $env:DJANGO_DEBUG='True';
 
+--> Comando pra subiir o site: $env:DJANGO_SECRET_KEY='local-test-key'; $env:DJANGO_DEBUG='True'; $env:DJANGO_ALLOWED_HOSTS='127.0.0.1,localhost'; python manage.py runserver 127.0.0.1:8000
+
+
 --------------------------------- Itens de exibição do ADMIN.PY --------------------------------------------------
     > list_display: define as colunas que aparecem na tabela do admin.
 
