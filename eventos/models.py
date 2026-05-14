@@ -45,23 +45,23 @@ class Participante(models.Model):
             return ""
 
         if self.idade <= 19:
-            return "15â€“19"
+            return "15-19"
         elif 20 <= self.idade <= 24:
-            return "20â€“24"
+            return "20-24"
         elif 25 <= self.idade <= 29:
-            return "25â€“29"
+            return "25-29"
         elif 30 <= self.idade <= 39:
-            return "30â€“39"
+            return "30-39"
         elif 40 <= self.idade <= 44:
-            return "40â€“44"
+            return "40-44"
         elif 45 <= self.idade <= 49:
-            return "45â€“49"
+            return "45-49"
         elif 50 <= self.idade <= 54:
-            return "50â€“54"
+            return "50-54"
         elif 55 <= self.idade <= 59:
-            return "55â€“59"
+            return "55-59"
         elif 60 <= self.idade <= 64:
-            return "60â€“64"
+            return "60-64"
         else:
             return "65+"
 
@@ -96,8 +96,8 @@ class Corrida(models.Model):
     )
 
     class Meta:
-        verbose_name = "InscriÃ§Ã£o Corrida"
-        verbose_name_plural = "InscriÃ§Ãµes Corridas"
+        verbose_name = "Inscrição Corrida"
+        verbose_name_plural = "Inscrições Corridas"
 
     def __str__(self):
         return self.nome
@@ -178,8 +178,8 @@ class Inscricao(models.Model):
     atualizada_em = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Inscricao"
-        verbose_name_plural = "Inscricoes"
+        verbose_name = "Inscrição"
+        verbose_name_plural = "Inscrições"
         constraints = [
             models.UniqueConstraint(
                 fields=["participante", "corrida"],
