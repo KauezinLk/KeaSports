@@ -230,6 +230,8 @@ def historico_usuario(request):
 
     alerta = None
     historico = None
+    atleta = None
+    estatisticas = None
 
     if request.method == "POST":
 
@@ -242,18 +244,76 @@ def historico_usuario(request):
                 Corredor.objects
                 .select_related("arquivo")
                 .filter(nome__icontains=nome)
-                .order_by("colocacao")
+                .order_by("-arquivo__criado_em", "colocacao")
             )
 
             if not historico.exists():
                 alerta = "Nome não encontrado."
+            else:
+                historico_lista = list(historico)
+                total_provas = len({c.arquivo_id for c in historico_lista if c.arquivo_id})
+                podios_arquivos = set()
+
+                for resultado in historico_lista:
+                    if not resultado.arquivo_id:
+                        continue
+
+                    ficou_top5_geral = resultado.colocacao and resultado.colocacao <= 5
+
+                    # A posicao por categoria usa o mesmo criterio da pagina de resultados:
+                    # quando ha tempo em segundos, ordena os atletas daquela categoria por tempo.
+                    posicao_categoria = None
+                    if resultado.categoria and resultado.tempo_segundos is not None:
+                        categoria_ids = list(
+                            Corredor.objects
+                            .filter(
+                                arquivo_id=resultado.arquivo_id,
+                                categoria=resultado.categoria,
+                                tempo_segundos__isnull=False,
+                            )
+                            .order_by("tempo_segundos", "colocacao")
+                            .values_list("id", flat=True)
+                        )
+
+                        if resultado.id in categoria_ids:
+                            posicao_categoria = categoria_ids.index(resultado.id) + 1
+
+                    ficou_top5_categoria = posicao_categoria is not None and posicao_categoria <= 5
+
+                    if ficou_top5_geral or ficou_top5_categoria:
+                        podios_arquivos.add(resultado.arquivo_id)
+
+                progresso_meta = 5
+                progresso_atual = min(total_provas, progresso_meta)
+                progresso_percentual = int((progresso_atual / progresso_meta) * 100) if progresso_meta else 0
+                corridas_restantes = max(progresso_meta - progresso_atual, 0)
+
+                atleta = {
+                    "nome": historico_lista[0].nome,
+                    "subtitulo": "Histórico de Corridas",
+                    "local": next((c.arquivo.local for c in historico_lista if c.arquivo and c.arquivo.local), ""),
+                }
+
+                estatisticas = {
+                    "total_provas": total_provas,
+                    # Nao ha calendario completo de etapas no banco para medir lacunas entre provas.
+                    # Por enquanto, a sequencia atual considera as provas registradas para o atleta.
+                    "provas_seguidas": total_provas,
+                    "podios": len(podios_arquivos),
+                    "progresso_atual": progresso_atual,
+                    "progresso_meta": progresso_meta,
+                    "progresso_percentual": progresso_percentual,
+                    "corridas_restantes": corridas_restantes,
+                }
 
     return render(
         request,
         "eventos/participante/historico_usuario.html",
         {
             "historico": historico,
-            "alerta": alerta
+            "alerta": alerta,
+            "atleta": atleta,
+            "estatisticas": estatisticas,
         }
     )
 

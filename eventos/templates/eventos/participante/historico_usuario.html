@@ -1,100 +1,250 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 
-<div class="w-full px-4 sm:px-10 py-6">
-
-    <h1 class="text-3xl font-bold mb-6 text-cyan-900">
-        HISTÓRICO DE CORRIDAS 
+<div class="mx-auto w-full max-w-6xl px-2 py-8 sm:px-4 lg:px-0">
+  <section class="mb-10">
+    <h1 class="text-3xl font-black tracking-wide text-[#083f52] sm:text-4xl">
+      HISTÓRICO DE CORRIDAS
     </h1>
 
-    <form method="post" class="flex flex-col gap-3 mb-6 max-w-xl" id="form-busca" autocomplete="off">
-        {% csrf_token %}
-        <div class="flex gap-3 items-start">
-            <div class="relative w-full">
-                <!-- Campo hidden para envio seguro ao backend -->
-                <input type="hidden" name="nome" id="nome_selecionado" value="">
-                
-                <input 
-                    type="text" 
-                    id="nome_busca" 
-                    placeholder="Digite o nome do corredor"
-                    class="border border-gray-300 rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    autocomplete="name"
-                    inputmode="text"
-                    data-1p-ignore="true"
-                    data-lpignore="true"
-                >
-                <div id="sugestoes-dropdown" class="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto hidden">
-                </div>
-            </div>
+    <form method="post" class="mt-7 max-w-[640px]" id="form-busca" autocomplete="off">
+      {% csrf_token %}
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <div class="relative w-full">
+          <input type="hidden" name="nome" id="nome_selecionado" value="{% if atleta %}{{ atleta.nome }}{% endif %}">
 
-            <button 
-                type="submit"
-                id="btn-buscar"
-                disabled
-                class="bg-gray-400 text-white px-6 py-2 rounded-lg font-semibold transition whitespace-nowrap cursor-not-allowed opacity-60"
-            >
-                Buscar
-            </button>
+          <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35" />
+            <circle cx="11" cy="11" r="7" />
+          </svg>
+          <input
+            type="text"
+            id="nome_busca"
+            value="{% if atleta %}{{ atleta.nome }}{% endif %}"
+            placeholder="Digite o nome do corredor"
+            class="h-12 w-full rounded-xl border border-gray-300 bg-white pl-12 pr-5 text-sm font-medium text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-[#083f52] focus:ring-4 focus:ring-[#083f52]/10"
+            autocomplete="name"
+            inputmode="text"
+            data-1p-ignore="true"
+            data-lpignore="true"
+          >
+
+          <div id="sugestoes-dropdown" class="absolute z-20 mt-2 hidden max-h-56 w-full overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-xl">
+          </div>
         </div>
 
-        <p id="msg-informativa" class="text-sm text-gray-500 italic">
-            Selecione um nome da lista para buscar
-        </p>
+        <button
+          type="submit"
+          id="btn-buscar"
+          {% if not atleta %}disabled{% endif %}
+          class="{% if atleta %}bg-[#083f52] hover:bg-[#062f3d]{% else %}cursor-not-allowed bg-slate-300 opacity-70{% endif %} h-12 rounded-xl px-8 text-sm font-black text-white shadow-sm transition whitespace-nowrap"
+        >
+          Buscar
+        </button>
+      </div>
+
+      <p id="msg-informativa" class="mt-3 text-sm italic text-slate-500">
+        Selecione um nome da lista para buscar
+      </p>
     </form>
 
     {% if alerta %}
-        <div class="bg-white border border-gray-400 text-gray-400 px-4 py-3 rounded mb-6">
-            {{ alerta }}
-        </div>
+      <div class="mt-6 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-semibold text-slate-500 shadow-sm">
+        {{ alerta }}
+      </div>
     {% endif %}
+  </section>
 
-    {% if historico %}
-
-    <div class="bg-white shadow-md rounded-xl overflow-hidden w-full">
-        <div class="overflow-x-auto">
-        <table class="w-full table-fixed text-left min-w-[600px]">
-
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-6 py-4 font-semibold text-gray-700">Corrida</th>
-                    <th class="px-6 py-4 font-semibold text-gray-700">Data</th>
-                    <th class="px-2 py-4 font-semibold text-gray-700 w-12 text-center whitespace-nowrap">Nº</th>
-                    <th class="px-6 py-4 font-semibold text-gray-700">Tempo</th>
-                </tr>
-            </thead>
-                    
-            <tbody class="divide-y divide-gray-200">
-                {% for c in historico %}
-                <tr class="hover:bg-gray-50 transition">
-
-                    <td class="px-6 py-4">
-                        {{ c.arquivo.nome }}
-                    </td>
-
-                    <td class="px-6 py-4 text-gray-600">
-                        {{ c.arquivo.data|default:"-" }}
-                    </td>
-
-                    <td class="px-2 py-4 text-center font-medium w-12 whitespace-nowrap">
-                        {{ c.colocacao }}º
-                    </td>
-
-                    <td class="px-6 py-4">
-                        {{ c.tempo_formatado }}
-                    </td>
-
-                </tr>
-                {% endfor %}
-            </tbody>
-
-        </table>
+  {% if historico %}
+  <section class="mb-8 overflow-hidden rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-8">
+    <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+      <div class="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <div class="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border border-red-100 bg-gradient-to-br from-white to-red-50 text-[#ef0000] shadow-inner sm:h-28 sm:w-28">
+          <svg class="h-12 w-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 7.5a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 21a7.5 7.5 0 0 1 15 0" />
+          </svg>
         </div>
+
+        <div>
+          <p class="text-xs font-black uppercase tracking-[0.18em] text-[#ef0000]">Atleta</p>
+          <h2 class="mt-1 text-3xl font-black text-slate-900 sm:text-4xl">{{ atleta.nome }}</h2>
+          <p class="mt-1 text-base font-semibold text-[#083f52]">{{ atleta.subtitulo }}</p>
+          <div class="mt-4 flex flex-wrap gap-3 text-sm font-bold text-slate-600">
+            <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-slate-50 px-4 py-2">
+              <svg class="h-4 w-4 text-[#ef0000]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 4 7 20" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="m17 8 3 4-4 2" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="m9 8-5 3 3 3" />
+              </svg>
+              {{ estatisticas.total_provas }} provas concluídas
+            </span>
+            {% if atleta.local %}
+            <span class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-slate-50 px-4 py-2">
+              <svg class="h-4 w-4 text-[#083f52]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5h.01" />
+              </svg>
+              {{ atleta.local }}
+            </span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <svg class="hidden h-32 w-32 text-[#083f52]/5 md:block" viewBox="0 0 120 120" fill="currentColor" aria-hidden="true">
+        <path d="M70 15a11 11 0 1 1-22 0 11 11 0 0 1 22 0ZM52 34c8-4 17-3 24 3l13 11a6 6 0 0 1-8 9L70 48l-10 17 14 13a7 7 0 0 1 2 5l-2 24a6 6 0 0 1-12-1l2-20-15-12-11 33a6 6 0 0 1-11-4l13-40 8-14-11 5-9 13a6 6 0 1 1-10-7l10-15a9 9 0 0 1 4-3l20-8Z" />
+      </svg>
+    </div>
+  </section>
+
+  <section class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[860px] text-left">
+        <thead class="bg-slate-50 text-sm text-slate-700">
+          <tr>
+            <th class="px-6 py-4 font-black">Colocação</th>
+            <th class="px-6 py-4 font-black">Corrida</th>
+            <th class="px-6 py-4 font-black">Categoria</th>
+            <th class="px-6 py-4 font-black">Tempo</th>
+            <th class="px-6 py-4 font-black">Ritmo</th>
+            <th class="px-6 py-4 font-black">Data</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-100 text-sm text-slate-700">
+          {% for c in historico %}
+          <tr class="{% if c.colocacao <= 5 %}bg-red-50/30{% endif %} transition hover:bg-slate-50">
+            <td class="px-6 py-5">
+              {% if c.colocacao == 1 %}
+                <span class="inline-flex items-center gap-2 rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1 font-black text-yellow-700">1º</span>
+              {% elif c.colocacao == 2 %}
+                <span class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1 font-black text-slate-600">2º</span>
+              {% elif c.colocacao == 3 %}
+                <span class="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1 font-black text-orange-700">3º</span>
+              {% else %}
+                <span class="font-black text-slate-800">{{ c.colocacao }}º</span>
+              {% endif %}
+            </td>
+            <td class="px-6 py-5">
+              <p class="font-black text-slate-900">{{ c.arquivo.nome }}</p>
+              {% if c.arquivo.local %}
+              <p class="mt-1 text-xs font-semibold text-slate-400">{{ c.arquivo.local }}</p>
+              {% endif %}
+            </td>
+            <td class="px-6 py-5 font-semibold">{{ c.categoria|default:"-" }}</td>
+            <td class="px-6 py-5 font-black text-slate-900">{{ c.tempo_formatado|default:"-" }}</td>
+            <td class="px-6 py-5 font-black text-[#ef0000]">{{ c.Vel_media|default:"-" }}</td>
+            <td class="px-6 py-5 font-semibold text-slate-500">{{ c.arquivo.data_corrida|default:"-" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <article class="rounded-3xl border border-yellow-200/70 bg-gradient-to-br from-white to-yellow-50 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.07)] sm:p-7">
+      <div class="flex items-center gap-5">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-yellow-100 text-yellow-600">
+          <svg class="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 6H4a3 3 0 0 0 3 3M17 6h3a3 3 0 0 1-3 3" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-sm font-black uppercase tracking-wide text-[#083f52]">PÓDIOS CONQUISTADOS</h3>
+          <p class="mt-1 text-4xl font-black text-[#ef0000]">{{ estatisticas.podios }}</p>
+          <p class="mt-1 text-sm font-bold text-slate-600">Top 5 geral ou categoria</p>
+          <p class="mt-3 text-xs font-medium leading-relaxed text-slate-500">
+            Quando pontua no geral, a categoria não é somada novamente.
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <article class="rounded-3xl border border-orange-200/70 bg-gradient-to-br from-white to-red-50 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.07)] sm:p-7">
+      <div class="flex items-center gap-5">
+        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+          <img
+            src="{% static 'imagens/flaticon-fogo-smashingstocks.svg' %}"
+            alt="Ícone de fogo"
+            class="h-11 w-11 object-contain"
+          />
+        </div>
+        <div>
+          <h3 class="text-sm font-black uppercase tracking-wide text-[#083f52]">PROVAS SEGUIDAS</h3>
+          <p class="mt-1 text-4xl font-black text-[#ef0000]">{{ estatisticas.provas_seguidas }}</p>
+          <p class="mt-1 text-sm font-bold text-slate-600">Sequência atual de provas participadas.</p>
+          <a
+            href="https://www.flaticon.com/br/icones-gratis/fogo"
+            title="fogo ícones"
+            class="sr-only"
+          >
+            Fogo ícones criados por smashingstocks - Flaticon
+          </a>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <section class="mt-8 rounded-3xl border border-gray-200 bg-gradient-to-br from-white to-slate-50 p-6 shadow-[0_18px_45px_rgba(15,23,42,0.08)] sm:p-8">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <h2 class="text-xl font-black tracking-wide text-[#083f52]">PROGRESSO DO ATLETA</h2>
+      <p class="text-base font-black text-slate-700">
+        <span class="text-2xl text-[#ef0000]">{{ estatisticas.progresso_atual }}</span>
+        / {{ estatisticas.progresso_meta }} corridas concluídas
+      </p>
     </div>
 
-    {% endif %}
+    <div class="mt-8 grid grid-cols-[auto_1fr_auto] items-center gap-4 sm:gap-6">
+      <div class="text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-red-100 bg-white shadow-sm">
+          <img
+            src="{% static 'imagens/icone-iniciante-corredor.png' %}"
+            alt="Ícone de corredor iniciante"
+            class="h-full w-full object-cover"
+          />
+        </div>
+        <p class="mt-2 text-xs font-black text-[#083f52]">Iniciante</p>
+      </div>
 
+      <div>
+        <div class="relative h-4 rounded-full bg-slate-200">
+          <div class="h-4 rounded-full bg-[#ef0000] shadow-[0_0_18px_rgba(239,0,0,0.24)]" style="width: {{ estatisticas.progresso_percentual }}%;"></div>
+          <div class="absolute top-1/2 flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-4 border-white bg-[#ef0000] text-white shadow-lg" style="left: {{ estatisticas.progresso_percentual }}%;">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 4 7 20" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="m17 8 3 4-4 2" />
+            </svg>
+          </div>
+        </div>
+        <div class="relative mt-4 h-5 text-xs font-black text-slate-500">
+          <span class="absolute left-0">0</span>
+          <span class="absolute -translate-x-1/2 text-[#ef0000]" style="left: {{ estatisticas.progresso_percentual }}%;">{{ estatisticas.progresso_atual }}</span>
+          <span class="absolute right-0">{{ estatisticas.progresso_meta }}</span>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-red-100 bg-white text-[#ef0000] opacity-80">
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 11V8a4 4 0 1 1 8 0v3" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 11h12v10H6z" />
+          </svg>
+        </div>
+        <p class="mt-2 text-xs font-black text-[#ef0000]">Intermediário</p>
+      </div>
+    </div>
+
+    <p class="mt-8 text-center text-sm font-semibold text-slate-600">
+      Faltam <span class="font-black text-[#ef0000]">{{ estatisticas.corridas_restantes }} corridas</span> para desbloquear o próximo nível.
+    </p>
+  </section>
+  {% endif %}
 </div>
 
 <script>
@@ -106,28 +256,26 @@
     const btnBuscar = document.getElementById('btn-buscar');
     const msgInformativa = document.getElementById('msg-informativa');
     let debounceTimer = null;
-    let nomeSelecionado = false;
+    let nomeSelecionado = Boolean(inputSelecionado.value);
 
-    // Função para habilitar/desabilitar o botão
     function atualizarBotao(ativo, texto) {
         if (ativo) {
             btnBuscar.disabled = false;
-            btnBuscar.classList.remove('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
-            btnBuscar.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            btnBuscar.classList.remove('bg-slate-300', 'cursor-not-allowed', 'opacity-70');
+            btnBuscar.classList.add('bg-[#083f52]', 'hover:bg-[#062f3d]');
             msgInformativa.textContent = texto || '';
-            msgInformativa.classList.remove('text-gray-500');
-            msgInformativa.classList.add('text-green-600');
+            msgInformativa.classList.remove('text-slate-500');
+            msgInformativa.classList.add('text-green-700');
         } else {
             btnBuscar.disabled = true;
-            btnBuscar.classList.remove('bg-blue-500', 'hover:bg-blue-600');
-            btnBuscar.classList.add('bg-gray-400', 'cursor-not-allowed', 'opacity-60');
+            btnBuscar.classList.remove('bg-[#083f52]', 'hover:bg-[#062f3d]');
+            btnBuscar.classList.add('bg-slate-300', 'cursor-not-allowed', 'opacity-70');
             msgInformativa.textContent = texto || 'Selecione um nome da lista para buscar';
-            msgInformativa.classList.remove('text-green-600');
-            msgInformativa.classList.add('text-gray-500');
+            msgInformativa.classList.remove('text-green-700');
+            msgInformativa.classList.add('text-slate-500');
         }
     }
 
-    // Função para buscar nomes via API
     function buscarSugestoes(termo) {
         if (!termo || termo.length < 1) {
             dropdown.classList.add('hidden');
@@ -150,7 +298,6 @@
             });
     }
 
-    // Função para exibir as sugestões no dropdown
     function mostrarSugestoes(nomes, termo) {
         dropdown.innerHTML = '';
 
@@ -161,7 +308,7 @@
 
         nomes.forEach(function(nome) {
             const item = document.createElement('div');
-            item.className = 'px-4 py-2 cursor-pointer hover:bg-gray-100 transition text-gray-700';
+            item.className = 'cursor-pointer px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50';
             item.setAttribute('role', 'option');
 
             const regex = new RegExp(escaparRegex(termo), 'gi');
@@ -174,7 +321,7 @@
                 }
 
                 const destaque = document.createElement('mark');
-                destaque.className = 'bg-yellow-100 font-semibold';
+                destaque.className = 'rounded bg-red-50 px-1 font-black text-[#ef0000]';
                 destaque.textContent = match[0];
                 item.appendChild(destaque);
                 posicaoAtual = regex.lastIndex;
@@ -184,7 +331,6 @@
                 item.appendChild(document.createTextNode(nome.slice(posicaoAtual)));
             }
 
-            // Click para selecionar
             item.addEventListener('click', function() {
                 selecionarNome(nome);
             });
@@ -195,7 +341,6 @@
         dropdown.classList.remove('hidden');
     }
 
-    // Função para selecionar um nome
     function selecionarNome(nome) {
         inputBusca.value = nome;
         inputSelecionado.value = nome;
@@ -204,55 +349,46 @@
         atualizarBotao(true, '"' + nome + '" selecionado - Clique em Buscar');
     }
 
-    // Função para escapar caracteres especiais no regex
     function escaparRegex(texto) {
         return texto.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
-    // Evento de input com debounce
     inputBusca.addEventListener('input', function() {
         const termo = this.value.trim();
 
-        // Se o usuário começar a digitar novamente, desabilita botão
         if (!nomeSelecionado || termo !== inputSelecionado.value) {
             nomeSelecionado = false;
             inputSelecionado.value = '';
             atualizarBotao(false);
         }
 
-        // Limpa o timer anterior
         if (debounceTimer) {
             clearTimeout(debounceTimer);
         }
 
-        // Aguarda 300ms antes de fazer a requisição
         debounceTimer = setTimeout(function() {
             buscarSugestoes(termo);
         }, 300);
     });
 
-    // Fechar dropdown ao clicar fora
     document.addEventListener('click', function(e) {
         if (!inputBusca.contains(e.target) && !dropdown.contains(e.target)) {
             dropdown.classList.add('hidden');
         }
     });
 
-    // Prevenir envio sem seleção válida
     formBusca.addEventListener('submit', function(e) {
         if (!nomeSelecionado || !inputSelecionado.value) {
             e.preventDefault();
             atualizarBotao(false, 'É necessário selecionar um nome da lista');
             return false;
         }
-        // Garantir que o valor do campo hidden é enviado corretamente
         return true;
     });
 
-    // Navegação por teclado (setas e Enter)
     inputBusca.addEventListener('keydown', function(e) {
         const itens = dropdown.querySelectorAll('div[role="option"]');
-        const itemAtivo = dropdown.querySelector('.bg-blue-50');
+        const itemAtivo = dropdown.querySelector('.bg-red-50');
         let indexAtivo = -1;
 
         itens.forEach(function(item, index) {
@@ -262,30 +398,32 @@
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             if (indexAtivo < itens.length - 1) {
-                if (itemAtivo) itemAtivo.classList.remove('bg-blue-50');
-                itens[indexAtivo + 1].classList.add('bg-blue-50');
+                if (itemAtivo) itemAtivo.classList.remove('bg-red-50');
+                itens[indexAtivo + 1].classList.add('bg-red-50');
             }
         } else if (e.key === 'ArrowUp') {
             e.preventDefault();
             if (indexAtivo > 0) {
-                if (itemAtivo) itemAtivo.classList.remove('bg-blue-50');
-                itens[indexAtivo - 1].classList.add('bg-blue-50');
+                if (itemAtivo) itemAtivo.classList.remove('bg-red-50');
+                itens[indexAtivo - 1].classList.add('bg-red-50');
             }
         } else if (e.key === 'Enter') {
             e.preventDefault();
             if (itemAtivo) {
                 selecionarNome(itemAtivo.textContent.trim());
             }
-            // Não permite submit sem seleção
         } else if (e.key === 'Escape') {
             dropdown.classList.add('hidden');
         }
     });
 
-    // Prevenir autofill do navegador
     inputBusca.addEventListener('focus', function() {
         this.setAttribute('data-form-type', 'search');
     });
+
+    if (nomeSelecionado) {
+        atualizarBotao(true, '"' + inputSelecionado.value + '" selecionado - Clique em Buscar');
+    }
 })();
 </script>
 
