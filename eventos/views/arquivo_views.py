@@ -5,9 +5,20 @@ from ..filters import CorredorFilter
 
 
 def ArquivoExcelListView(request):
+    query = request.GET.get('q', '').strip()
     arquivos = ArquivoExcel.objects.all().order_by('-criado_em')
+
+    if query:
+        arquivos = arquivos.filter(nome__icontains=query)
+
+    paginator = Paginator(arquivos, 9)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+
     return render(request, 'eventos/arquivo/arquivo_list.html', {
-        'arquivos': arquivos # Isso é o que será utilizado no template para acessar os dados dos arquivos.
+        'arquivos': page,
+        'page': page,
+        'query': query,
     })
 
 
@@ -24,7 +35,7 @@ def arquivo_detail(request, pk):
     # request.GET recebe todos os parâmetros que vêm depois do ? na URL.
     filtroFinal = filtro.qs
 
-    categoria = request.GET.get('categoria') 
+    categoria = request.GET.get('categoria')
 
     if categoria:
         filtroFinal = filtroFinal.order_by("tempo_segundos")
@@ -37,7 +48,7 @@ def arquivo_detail(request, pk):
 
 
     # Organizando por paginação
-    
+
     paginator = Paginator(filtroFinal, 10)   # Se eu quiser usar a tabela original uso qs, se quiser usar com os filtros aplicados eu uso filtro.qs
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
