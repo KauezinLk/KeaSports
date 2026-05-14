@@ -34,7 +34,11 @@
         <img
           src="{{ arquivo.imagem.url }}"
           alt="{{ arquivo.nome }}"
-          class="w-full h-44 object-cover rounded-lg mb-3"
+          class="w-full h-44 object-cover rounded-lg mb-3 cursor-zoom-in transition hover:opacity-90"
+          data-lightbox-image
+          data-lightbox-src="{{ arquivo.imagem.url }}"
+          data-lightbox-alt="{{ arquivo.nome }}"
+          tabindex="0"
         />
         {% else %}
         <div

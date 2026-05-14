@@ -154,6 +154,27 @@
       </div>
     </footer>
 
+    <div
+      id="imageLightbox"
+      class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+      aria-hidden="true"
+    >
+      <button
+        type="button"
+        class="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-3xl leading-none text-gray-900 shadow-lg transition hover:bg-white sm:right-6 sm:top-6"
+        aria-label="Fechar imagem ampliada"
+        data-lightbox-close
+      >
+        &times;
+      </button>
+      <img
+        id="imageLightboxImg"
+        src=""
+        alt=""
+        class="max-h-[85vh] max-w-full rounded-lg object-contain shadow-2xl"
+      />
+    </div>
+
     <script>
       function toggleMobileMenu() {
         const menu = document.getElementById("mobileMenu");
@@ -170,6 +191,59 @@
         menu.classList.add("hidden");
         button.setAttribute("aria-expanded", "false");
       }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const lightbox = document.getElementById("imageLightbox");
+        const lightboxImg = document.getElementById("imageLightboxImg");
+        const closeButton = document.querySelector("[data-lightbox-close]");
+
+        if (!lightbox || !lightboxImg || !closeButton) return;
+
+        function openLightbox(image) {
+          lightboxImg.src = image.dataset.lightboxSrc || image.src;
+          lightboxImg.alt = image.dataset.lightboxAlt || image.alt || "Imagem ampliada";
+          lightbox.classList.remove("hidden");
+          lightbox.classList.add("flex");
+          lightbox.setAttribute("aria-hidden", "false");
+          document.body.classList.add("overflow-hidden");
+          closeButton.focus();
+        }
+
+        function closeLightbox() {
+          lightbox.classList.add("hidden");
+          lightbox.classList.remove("flex");
+          lightbox.setAttribute("aria-hidden", "true");
+          document.body.classList.remove("overflow-hidden");
+          lightboxImg.src = "";
+        }
+
+        document.querySelectorAll("[data-lightbox-image]").forEach(function (image) {
+          image.addEventListener("click", function () {
+            openLightbox(image);
+          });
+
+          image.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openLightbox(image);
+            }
+          });
+        });
+
+        lightbox.addEventListener("click", function (event) {
+          if (event.target === lightbox) {
+            closeLightbox();
+          }
+        });
+
+        closeButton.addEventListener("click", closeLightbox);
+
+        document.addEventListener("keydown", function (event) {
+          if (event.key === "Escape" && !lightbox.classList.contains("hidden")) {
+            closeLightbox();
+          }
+        });
+      });
     </script>
   </body>
 </html>

@@ -13,7 +13,11 @@
     <img
       src="{{ corrida.imagem.url }}"
       alt="{{ corrida.nome }}"
-      class="w-full h-44 object-cover rounded-lg mb-3"
+      class="w-full h-44 object-cover rounded-lg mb-3 cursor-zoom-in transition hover:opacity-90"
+      data-lightbox-image
+      data-lightbox-src="{{ corrida.imagem.url }}"
+      data-lightbox-alt="{{ corrida.nome }}"
+      tabindex="0"
     />
     {% else %}
     <div

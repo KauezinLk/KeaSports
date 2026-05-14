@@ -36,8 +36,12 @@
     {% if arquivo.imagem %}
     <img
       src="{{ arquivo.imagem.url }}"
-      alt="Imagem"
-      class="w-full h-44 object-cover rounded-lg mb-3"
+      alt="{{ arquivo.nome }}"
+      class="w-full h-44 object-cover rounded-lg mb-3 cursor-zoom-in transition hover:opacity-90"
+      data-lightbox-image
+      data-lightbox-src="{{ arquivo.imagem.url }}"
+      data-lightbox-alt="{{ arquivo.nome }}"
+      tabindex="0"
     />
     {% else %}
     <div
