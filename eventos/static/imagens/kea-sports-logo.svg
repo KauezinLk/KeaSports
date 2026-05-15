@@ -1,0 +1,29 @@
+<svg width="560" height="154" viewBox="0 0 560 154" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="keaSportsLogoTitle">
+  <title id="keaSportsLogoTitle">Kea Sports</title>
+  <rect x="8" y="18" width="544" height="118" rx="14" fill="#FFFFFF"/>
+
+  <g>
+    <path d="M42 38H214L195 116H24L42 38Z" fill="#E50914"/>
+    <text
+      x="68"
+      y="94"
+      fill="#FFFFFF"
+      font-family="Arial Black, Impact, Montserrat, Arial, sans-serif"
+      font-size="58"
+      font-weight="900"
+      font-style="italic"
+      letter-spacing="-2"
+    >Kea</text>
+  </g>
+
+  <text
+    x="228"
+    y="94"
+    fill="#0B1736"
+    font-family="Montserrat, Avenir Next, Trebuchet MS, Arial, sans-serif"
+    font-size="54"
+    font-weight="500"
+    font-style="italic"
+    letter-spacing="-1"
+  >Sports</text>
+</svg>
