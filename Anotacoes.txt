@@ -1,5 +1,7 @@
 --> Comando para atualizações: $env:DJANGO_SECRET_KEY='local-test-key'; $env:DJANGO_DEBUG='True';
 
+--> $env:DJANGO_SECRET_KEY='local-test-key'; $env:DJANGO_DEBUG='True'; python manage.py migrate
+
 --> Comando pra subiir o site: $env:DJANGO_SECRET_KEY='local-test-key'; $env:DJANGO_DEBUG='True'; $env:DJANGO_ALLOWED_HOSTS='127.0.0.1,localhost'; python manage.py runserver 127.0.0.1:8000
 
 
