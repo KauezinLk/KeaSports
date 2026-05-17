@@ -1,4 +1,6 @@
 import re
+import unicodedata
+from collections import defaultdict
 
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -7,7 +9,28 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
 
 from eventos.forms import ParticipanteForm
-from eventos.models import ArquivoExcel, Corrida, Inscricao, Participante
+from eventos.models import ArquivoExcel, Corredor, Corrida, Inscricao, Participante
+
+
+RANKINKG_CATEGORIAS = [
+    "15 - 19",
+    "20 - 24",
+    "25 - 29",
+    "30 - 34",
+    "35 - 39",
+    "40 - 44",
+    "45 - 49",
+    "50 - 54",
+    "55 - 59",
+    "60 - 64",
+    "65+",
+]
+RANKINKG_SEXOS = [
+    ("M", "Masculino"),
+    ("F", "Feminino"),
+]
+PONTOS_GERAL = [21, 18, 16, 14, 12]
+PONTOS_CATEGORIA = [10, 8, 6, 4, 2, 1, 1, 1, 1, 1]
 
 
 def index(request):
@@ -30,6 +53,223 @@ def index(request):
 def listar_corridas(request):
     corridas = Corrida.objects.all()
     return render(request, "eventos/corrida/listar_corridas.html", {"corridas": corridas})
+
+
+def _normalizar_texto(valor):
+    texto = str(valor or "").strip().lower()
+    texto = unicodedata.normalize("NFKD", texto)
+    return "".join(char for char in texto if not unicodedata.combining(char))
+
+
+def _normalizar_categoria(valor):
+    texto = _normalizar_texto(valor)
+
+    if "65" in texto and ("+" in texto or "mais" in texto):
+        return "65+"
+
+    match = re.search(r"(\d{2})\s*[-a/]\s*(\d{2})", texto)
+    if not match:
+        match = re.search(r"(\d{2})(\d{2})", texto)
+    if not match:
+        return ""
+
+    categoria = f"{match.group(1)} - {match.group(2)}"
+    return categoria if categoria in RANKINKG_CATEGORIAS else ""
+
+
+def _normalizar_sexo(corredor):
+    if corredor.participante and corredor.participante.sexo in {"M", "F"}:
+        return corredor.participante.sexo
+
+    categoria = _normalizar_texto(corredor.categoria)
+    if re.search(r"\b(f|fem|feminino)\b", categoria) or categoria.startswith("f"):
+        return "F"
+    if re.search(r"\b(m|masc|masculino)\b", categoria) or categoria.startswith("m"):
+        return "M"
+    return ""
+
+
+def _chave_atleta(corredor, sexo):
+    if corredor.participante_id:
+        return ("participante", corredor.participante_id)
+    return ("nome", _normalizar_texto(corredor.nome), sexo)
+
+
+def _novo_atleta(corredor, sexo, categoria):
+    return {
+        "nome": corredor.nome,
+        "sexo": sexo,
+        "categoria": categoria or _normalizar_categoria(corredor.categoria) or corredor.categoria,
+        "pontos": 0,
+    }
+
+
+def _somar_pontos(ranking, corredor, sexo, categoria, pontos):
+    chave = _chave_atleta(corredor, sexo)
+    atleta = ranking.setdefault(chave, _novo_atleta(corredor, sexo, categoria))
+    atleta["pontos"] += pontos
+    if categoria and not atleta.get("categoria"):
+        atleta["categoria"] = categoria
+    return atleta
+
+
+def _rankear_atletas(atletas, limite=None):
+    ranking = sorted(
+        atletas,
+        key=lambda atleta: (-atleta["pontos"], atleta["nome"]),
+    )
+    return ranking[:limite] if limite else ranking
+
+
+def _ordenar_resultados(corredores):
+    return sorted(
+        corredores,
+        key=lambda c: (
+            c.tempo_segundos is None,
+            c.tempo_segundos if c.tempo_segundos is not None else c.colocacao,
+            c.colocacao,
+        ),
+    )
+
+
+def _agrupar_por_sexo(corredores):
+    corredores_por_sexo = {"M": [], "F": []}
+
+    for corredor in corredores:
+        sexo = _normalizar_sexo(corredor)
+        if sexo in corredores_por_sexo:
+            corredores_por_sexo[sexo].append(corredor)
+
+    return corredores_por_sexo
+
+
+def _pontuar_geral_por_sexo(corredores_por_sexo, ranking_geral):
+    top_geral_ids_por_sexo = {"M": set(), "F": set()}
+
+    for sexo, corredores_sexo in corredores_por_sexo.items():
+        for indice, corredor in enumerate(_ordenar_resultados(corredores_sexo)[:5]):
+            categoria = _normalizar_categoria(corredor.categoria)
+            _somar_pontos(
+                ranking_geral[sexo],
+                corredor,
+                sexo,
+                categoria,
+                PONTOS_GERAL[indice],
+            )
+            top_geral_ids_por_sexo[sexo].add(corredor.id)
+
+    return top_geral_ids_por_sexo
+
+
+def _pontuar_categorias_por_sexo(corredores, ranking_categoria, top_geral_ids_por_sexo):
+    grupos_categoria = defaultdict(list)
+
+    for corredor in corredores:
+        sexo = _normalizar_sexo(corredor)
+        categoria = _normalizar_categoria(corredor.categoria)
+        if sexo in {"M", "F"} and categoria:
+            grupos_categoria[(categoria, sexo)].append(corredor)
+
+    for (categoria, sexo), corredores_categoria in grupos_categoria.items():
+        elegiveis = [
+            corredor
+            for corredor in _ordenar_resultados(corredores_categoria)
+            if corredor.id not in top_geral_ids_por_sexo[sexo]
+        ]
+
+        for indice, corredor in enumerate(elegiveis[:10]):
+            _somar_pontos(
+                ranking_categoria[categoria][sexo],
+                corredor,
+                sexo,
+                categoria,
+                PONTOS_CATEGORIA[indice],
+            )
+
+
+def calcular_rankinkg():
+    ranking_geral = {
+        "M": defaultdict(dict),
+        "F": defaultdict(dict),
+    }
+    ranking_categoria = defaultdict(lambda: defaultdict(dict))
+
+    arquivos_ids = (
+        Corredor.objects
+        .exclude(arquivo_id__isnull=True)
+        .values_list("arquivo_id", flat=True)
+        .distinct()
+    )
+
+    for arquivo_id in arquivos_ids:
+        corredores = list(
+            Corredor.objects
+            .select_related("participante")
+            .filter(arquivo_id=arquivo_id)
+            .order_by("colocacao")
+        )
+        corredores_por_sexo = _agrupar_por_sexo(corredores)
+        top_geral_ids_por_sexo = _pontuar_geral_por_sexo(
+            corredores_por_sexo,
+            ranking_geral,
+        )
+        _pontuar_categorias_por_sexo(
+            corredores,
+            ranking_categoria,
+            top_geral_ids_por_sexo,
+        )
+
+    gerais = {}
+    for sexo, atletas in ranking_geral.items():
+        gerais[sexo] = _rankear_atletas(atletas.values(), limite=5)
+
+    categorias = {}
+    for categoria in RANKINKG_CATEGORIAS:
+        categorias[categoria] = {}
+        for sexo, _ in RANKINKG_SEXOS:
+            categorias[categoria][sexo] = _rankear_atletas(
+                ranking_categoria[categoria][sexo].values()
+            )
+
+    return gerais, categorias
+
+
+def rankinkg(request):
+    categoria_selecionada = request.GET.get("categoria") or RANKINKG_CATEGORIAS[0]
+    sexo_selecionado = request.GET.get("sexo") or "M"
+
+    if categoria_selecionada not in RANKINKG_CATEGORIAS:
+        categoria_selecionada = RANKINKG_CATEGORIAS[0]
+    if sexo_selecionado not in {"M", "F"}:
+        sexo_selecionado = "M"
+
+    ranking_geral, ranking_categoria = calcular_rankinkg()
+    ranking_filtrado = ranking_categoria[categoria_selecionada][sexo_selecionado]
+
+    return render(
+        request,
+        "eventos/rankinkg.html",
+        {
+            "categorias": RANKINKG_CATEGORIAS,
+            "sexos": RANKINKG_SEXOS,
+            "categoria_selecionada": categoria_selecionada,
+            "sexo_selecionado": sexo_selecionado,
+            "sexo_selecionado_nome": dict(RANKINKG_SEXOS)[sexo_selecionado],
+            "ranking_geral_masculino": ranking_geral["M"],
+            "ranking_geral_feminino": ranking_geral["F"],
+            "ranking_categoria": ranking_filtrado,
+            "tem_resultados": Corredor.objects.exists(),
+            "pontos_geral": zip(range(1, 6), PONTOS_GERAL),
+            "pontos_categoria": [
+                ("1º", 10),
+                ("2º", 8),
+                ("3º", 6),
+                ("4º", 4),
+                ("5º", 2),
+                ("6º ao 10º", 1),
+            ],
+        },
+    )
 
 
 def validar_cpf(cpf):

@@ -7,6 +7,7 @@ urlpatterns = [
 
     # Corridas
     path('corridas/', views.listar_corridas, name='listar_corridas'),
+    path('rankinkg/', views.rankinkg, name='rankinkg'),
     path('corridas/<int:corrida_id>/inscrever/', views.inscrever_corrida, name='inscrever_corrida'),
     path('eventos/buscar-cpf/', views.buscar_usuario_cpf, name='buscar_usuario_cpf'),
 

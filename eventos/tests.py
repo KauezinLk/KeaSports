@@ -1,10 +1,13 @@
 from datetime import date, timedelta
 
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
-from eventos.models import Corrida, Inscricao, Participante
+from eventos.models import ArquivoExcel, Corredor, Corrida, Inscricao, Participante
+from eventos.signals import extrair_dados_excel
+from eventos.views.corrida_views import calcular_rankinkg
 
 
 CPF_VALIDO = "52998224725"
@@ -166,3 +169,82 @@ class InscricaoCorridaTests(TestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertFalse(Inscricao.objects.filter(corrida=self.corrida_1).exists())
+
+
+@override_settings(STORAGES=TEST_STORAGES)
+class RankinkgTests(TestCase):
+    def criar_arquivo_resultado(self):
+        post_save.disconnect(extrair_dados_excel, sender=ArquivoExcel)
+        try:
+            return ArquivoExcel.objects.create(
+                nome="Etapa Teste",
+                data_corrida="01/05/2026",
+                local="Sorocaba",
+                arquivo="uploads/etapa-teste.xlsx",
+            )
+        finally:
+            post_save.connect(extrair_dados_excel, sender=ArquivoExcel)
+
+    def test_pontuacao_categoria_desce_quando_atleta_ja_pontuou_no_geral(self):
+        arquivo = self.criar_arquivo_resultado()
+
+        for posicao in range(1, 12):
+            Corredor.objects.create(
+                arquivo=arquivo,
+                colocacao=posicao,
+                numero=str(posicao),
+                nome=f"Atleta {posicao}",
+                categoria="M 35-39",
+                tempo_segundos=float(posicao),
+                tempo_formatado=f"00:{posicao:02d}:00",
+                Vel_media="12 km/h",
+            )
+
+        ranking_geral, ranking_categoria = calcular_rankinkg()
+
+        self.assertEqual(ranking_geral["M"][0]["nome"], "Atleta 1")
+        self.assertEqual(ranking_geral["M"][0]["pontos"], 21)
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][0]["nome"], "Atleta 6")
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][0]["pontos"], 10)
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][4]["nome"], "Atleta 10")
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][4]["pontos"], 2)
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][5]["nome"], "Atleta 11")
+        self.assertEqual(ranking_categoria["35 - 39"]["M"][5]["pontos"], 1)
+
+    def test_ranking_geral_feminino_considera_apenas_mulheres(self):
+        arquivo = self.criar_arquivo_resultado()
+
+        for posicao in range(1, 27):
+            Corredor.objects.create(
+                arquivo=arquivo,
+                colocacao=posicao,
+                numero=str(posicao),
+                nome=f"Homem {posicao}",
+                categoria="35 a 39 anos - Masculino",
+                tempo_segundos=float(posicao),
+                tempo_formatado=f"00:{posicao:02d}:00",
+                Vel_media="12 km/h",
+            )
+
+        for indice, posicao in enumerate(range(27, 33), start=1):
+            Corredor.objects.create(
+                arquivo=arquivo,
+                colocacao=posicao,
+                numero=str(posicao),
+                nome=f"Mulher {indice}",
+                categoria="40 a 44 anos - Feminino",
+                tempo_segundos=float(posicao),
+                tempo_formatado=f"00:{posicao:02d}:00",
+                Vel_media="12 km/h",
+            )
+
+        ranking_geral, ranking_categoria = calcular_rankinkg()
+
+        self.assertEqual(ranking_geral["M"][0]["nome"], "Homem 1")
+        self.assertEqual(ranking_geral["M"][0]["pontos"], 21)
+        self.assertEqual(ranking_geral["F"][0]["nome"], "Mulher 1")
+        self.assertEqual(ranking_geral["F"][0]["pontos"], 21)
+        self.assertEqual(ranking_geral["F"][4]["nome"], "Mulher 5")
+        self.assertEqual(ranking_geral["F"][4]["pontos"], 12)
+        self.assertEqual(ranking_categoria["40 - 44"]["F"][0]["nome"], "Mulher 6")
+        self.assertEqual(ranking_categoria["40 - 44"]["F"][0]["pontos"], 10)

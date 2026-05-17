@@ -23,6 +23,7 @@
           <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
           <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
           <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+          <a class="rounded-full px-4 py-2 text-sm font-bold text-gray-700 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'rankinkg' %}">Rankinkg</a>
 
           {% if user.is_authenticated %}
             <span class="ml-2 rounded-full bg-gray-100 px-4 py-2 text-sm font-bold text-gray-700">
@@ -79,6 +80,7 @@
           <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
           <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
           <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+          <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'rankinkg' %}">Rankinkg</a>
           <a class="rounded-lg px-4 py-3 text-gray-800 transition hover:bg-red-50 hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
 
           {% if user.is_authenticated %}
@@ -119,6 +121,7 @@
             <a class="transition hover:text-[#E30000]" href="{% url 'index' %}">Inicio</a>
             <a class="transition hover:text-[#E30000]" href="{% url 'listar_corridas' %}">Corridas</a>
             <a class="transition hover:text-[#E30000]" href="{% url 'arquivo_list' %}">Resultados</a>
+            <a class="transition hover:text-[#E30000]" href="{% url 'rankinkg' %}">Rankinkg</a>
             <a class="transition hover:text-[#E30000]" href="{% url 'historico_usuario' %}">Historico</a>
           </nav>
         </div>

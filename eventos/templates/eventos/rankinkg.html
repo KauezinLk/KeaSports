@@ -1,0 +1,369 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Rankinkg | Kea Sports{% endblock %}
+
+{% block content %}
+<style>
+  .rankinkg-hero {
+    min-height: 300px;
+  }
+
+  .rankinkg-hero__image {
+    object-position: 68% center;
+  }
+
+  .rankinkg-hero__inner {
+    min-height: 300px;
+    padding-bottom: 5.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .rankinkg-hero,
+    .rankinkg-hero__inner {
+      min-height: 380px;
+    }
+
+    .rankinkg-hero__inner {
+      padding-bottom: 7rem;
+    }
+
+    .rankinkg-hero__image {
+      object-position: 60% center;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .rankinkg-hero,
+    .rankinkg-hero__inner {
+      min-height: 500px;
+    }
+
+    .rankinkg-hero__inner {
+      padding-bottom: 10rem;
+    }
+
+    .rankinkg-hero__image {
+      object-position: center center;
+    }
+  }
+</style>
+
+<div class="relative mx-[-1rem] -mt-6 overflow-hidden bg-[#f8fafc] pb-14 sm:mx-[-1.5rem] md:mx-[-2.5rem] lg:mx-[-3.5rem]">
+  <section class="rankinkg-hero relative overflow-hidden bg-[#0F172A] text-white shadow-[0_24px_80px_rgba(15,23,42,0.22)]">
+    <img
+      src="{% static 'imagens/kea-sports-runner-hero.png' %}"
+      alt="Corredor Kea Sports"
+      class="rankinkg-hero__image absolute inset-0 h-full w-full object-cover opacity-70"
+    />
+    <div class="absolute inset-0 bg-[linear-gradient(90deg,rgba(2,6,12,0.96)_0%,rgba(15,23,42,0.88)_34%,rgba(15,23,42,0.46)_68%,rgba(15,23,42,0.14)_100%)]"></div>
+    <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(227,0,0,0.32),transparent_36%),linear-gradient(100deg,transparent_0%,rgba(255,255,255,0.12)_50%,transparent_55%)]"></div>
+    <div class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+    <div class="absolute bottom-16 right-10 hidden h-px w-96 bg-gradient-to-r from-transparent via-red-500 to-transparent lg:block"></div>
+    <div class="absolute bottom-28 right-24 hidden h-px w-64 bg-gradient-to-r from-transparent via-white/50 to-transparent lg:block"></div>
+
+    <div class="rankinkg-hero__inner relative mx-auto flex w-full max-w-6xl flex-col justify-center px-4 py-12 sm:px-6 sm:py-16 lg:px-0 lg:py-20">
+      <div class="max-w-3xl">
+        <span class="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-black uppercase text-white/86 backdrop-blur">
+          <span class="h-2 w-2 rounded-full bg-[#E30000] shadow-[0_0_18px_rgba(227,0,0,0.95)]"></span>
+          Classificação anual
+        </span>
+        <h1 class="mt-6 text-4xl font-black uppercase leading-none text-white sm:text-5xl lg:text-6xl">
+          RANKING KEA SPORTS
+        </h1>
+        <p class="mt-5 max-w-2xl text-base font-medium leading-relaxed text-slate-200 sm:text-lg">
+          Acompanhe a pontuação dos atletas por classificação geral e categoria.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div class="relative mx-auto w-full max-w-6xl px-4 pt-10 sm:px-6 lg:px-0">
+    {% if not tem_resultados %}
+      <div class="rounded-[1.5rem] border border-slate-200 bg-white p-8 text-center shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+        <h2 class="text-2xl font-black text-[#0F172A]">Nenhum resultado cadastrado ainda</h2>
+        <p class="mt-3 text-sm font-semibold text-slate-500">
+          Assim que as tabelas Excel forem importadas, o ranking será calculado automaticamente.
+        </p>
+      </div>
+    {% endif %}
+
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <article class="overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+        <div class="h-1.5 bg-gradient-to-r from-[#E30000] via-red-500 to-white/30"></div>
+        <div class="p-6 sm:p-7">
+          <div class="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-black uppercase text-red-400">Top 5 Geral</p>
+              <h2 class="mt-1 text-2xl font-black">Ranking Geral Masculino</h2>
+            </div>
+            <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-white">M</span>
+          </div>
+
+          {% if ranking_geral_masculino %}
+            <div class="overflow-hidden rounded-2xl border border-white/10">
+              <table class="w-full min-w-full text-left text-sm">
+                <thead class="bg-white/10 text-xs font-black uppercase text-slate-300">
+                  <tr>
+                    <th class="px-4 py-3">Pos.</th>
+                    <th class="px-4 py-3">Atleta</th>
+                    <th class="hidden px-4 py-3 sm:table-cell">Categoria</th>
+                    <th class="px-4 py-3 text-right">Pontos</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10">
+                  {% for atleta in ranking_geral_masculino %}
+                    <tr class="bg-white/[0.03]">
+                      <td class="px-4 py-4 font-black text-red-400">{{ forloop.counter }}º</td>
+                      <td class="px-4 py-4 font-bold">{{ atleta.nome }}</td>
+                      <td class="hidden px-4 py-4 text-slate-300 sm:table-cell">{{ atleta.categoria|default:"-" }}</td>
+                      <td class="px-4 py-4 text-right text-lg font-black">{{ atleta.pontos }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-slate-300">
+              Ainda não há atletas masculinos com pontuação geral.
+            </p>
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="overflow-hidden rounded-[1.5rem] border border-slate-800 bg-slate-950 text-white shadow-[0_24px_70px_rgba(15,23,42,0.18)]">
+        <div class="h-1.5 bg-gradient-to-r from-[#E30000] via-red-500 to-white/30"></div>
+        <div class="p-6 sm:p-7">
+          <div class="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <p class="text-xs font-black uppercase text-red-400">Top 5 Geral</p>
+              <h2 class="mt-1 text-2xl font-black">Ranking Geral Feminino</h2>
+            </div>
+            <span class="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-white">F</span>
+          </div>
+
+          {% if ranking_geral_feminino %}
+            <div class="overflow-hidden rounded-2xl border border-white/10">
+              <table class="w-full min-w-full text-left text-sm">
+                <thead class="bg-white/10 text-xs font-black uppercase text-slate-300">
+                  <tr>
+                    <th class="px-4 py-3">Pos.</th>
+                    <th class="px-4 py-3">Atleta</th>
+                    <th class="hidden px-4 py-3 sm:table-cell">Categoria</th>
+                    <th class="px-4 py-3 text-right">Pontos</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-white/10">
+                  {% for atleta in ranking_geral_feminino %}
+                    <tr class="bg-white/[0.03]">
+                      <td class="px-4 py-4 font-black text-red-400">{{ forloop.counter }}º</td>
+                      <td class="px-4 py-4 font-bold">{{ atleta.nome }}</td>
+                      <td class="hidden px-4 py-4 text-slate-300 sm:table-cell">{{ atleta.categoria|default:"-" }}</td>
+                      <td class="px-4 py-4 text-right text-lg font-black">{{ atleta.pontos }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-semibold text-slate-300">
+              Ainda não há atletas femininas com pontuação geral.
+            </p>
+          {% endif %}
+        </div>
+      </article>
+    </section>
+
+    <section class="mt-10 rounded-[1.25rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.09)] sm:p-6">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div class="max-w-xl">
+          <p class="text-xs font-black uppercase text-[#E30000]">Pontuação por faixa</p>
+          <h2 class="mt-1 text-2xl font-black text-[#0F172A] sm:text-3xl">Ranking por Categoria</h2>
+          <p class="mt-2 text-sm font-semibold text-slate-500">
+            {{ categoria_selecionada }} {{ sexo_selecionado_nome }} - atletas ranqueados apenas contra o mesmo sexo.
+          </p>
+        </div>
+
+        <form method="get" class="grid w-full grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 shadow-inner sm:grid-cols-[minmax(170px,1fr)_minmax(150px,0.8fr)_auto] lg:max-w-[610px]">
+          <div class="relative" data-rankinkg-dropdown>
+            <input type="hidden" name="categoria" value="{{ categoria_selecionada }}" data-rankinkg-input>
+            <span class="mb-1 block text-[0.68rem] font-black uppercase text-slate-500">Categoria</span>
+            <button type="button" class="flex h-12 w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 text-left text-sm font-black text-slate-900 shadow-sm transition hover:border-red-200 hover:bg-red-50/40 focus:border-[#E30000] focus:outline-none focus:ring-4 focus:ring-red-500/15" data-rankinkg-button>
+              <span data-rankinkg-label>{{ categoria_selecionada }}</span>
+              <svg class="h-4 w-4 shrink-0 text-[#E30000] transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" data-rankinkg-arrow>
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div class="absolute left-0 right-0 top-full z-30 mt-2 hidden max-h-64 overflow-y-auto rounded-xl border border-slate-200 bg-white p-1 shadow-2xl" data-rankinkg-menu>
+              {% for categoria in categorias %}
+                <button type="button" class="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition hover:bg-red-50 hover:text-[#E30000] {% if categoria == categoria_selecionada %}bg-red-50 text-[#E30000]{% endif %}" data-value="{{ categoria }}">
+                  {{ categoria }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="relative" data-rankinkg-dropdown>
+            <input type="hidden" name="sexo" value="{{ sexo_selecionado }}" data-rankinkg-input>
+            <span class="mb-1 block text-[0.68rem] font-black uppercase text-slate-500">Sexo</span>
+            <button type="button" class="flex h-12 w-full items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 text-left text-sm font-black text-slate-900 shadow-sm transition hover:border-red-200 hover:bg-red-50/40 focus:border-[#E30000] focus:outline-none focus:ring-4 focus:ring-red-500/15" data-rankinkg-button>
+              <span data-rankinkg-label>{{ sexo_selecionado_nome }}</span>
+              <svg class="h-4 w-4 shrink-0 text-[#E30000] transition" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" data-rankinkg-arrow>
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            <div class="absolute left-0 right-0 top-full z-30 mt-2 hidden overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-2xl" data-rankinkg-menu>
+              {% for valor, rotulo in sexos %}
+                <button type="button" class="block w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-slate-700 transition hover:bg-red-50 hover:text-[#E30000] {% if valor == sexo_selecionado %}bg-red-50 text-[#E30000]{% endif %}" data-value="{{ valor }}">
+                  {{ rotulo }}
+                </button>
+              {% endfor %}
+            </div>
+          </div>
+
+          <button type="submit" class="h-12 rounded-xl bg-[#E30000] px-7 text-sm font-black text-white shadow-[0_12px_24px_rgba(227,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-red-700 sm:self-end">
+            Filtrar
+          </button>
+        </form>
+      </div>
+
+      <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+        {% if ranking_categoria %}
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[720px] text-left text-sm">
+              <thead class="bg-slate-950 text-xs font-black uppercase text-white">
+                <tr>
+                  <th class="px-5 py-4">Posição</th>
+                  <th class="px-5 py-4">Nome do atleta</th>
+                  <th class="px-5 py-4 text-right">Pontuação atual</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                {% for atleta in ranking_categoria %}
+                  <tr class="odd:bg-white even:bg-slate-50 hover:bg-red-50/60">
+                    <td class="px-5 py-4 font-black text-[#E30000]">{{ forloop.counter }}º</td>
+                    <td class="px-5 py-4 font-bold text-slate-900">{{ atleta.nome }}</td>
+                    <td class="px-5 py-4 text-right text-lg font-black text-slate-950">{{ atleta.pontos }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="bg-slate-50 px-5 py-5 text-center text-sm font-bold text-slate-500">
+            Nenhum atleta pontuou em {{ categoria_selecionada }} {{ sexo_selecionado_nome }} ainda.
+          </p>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="mt-10">
+      <div class="mb-5">
+        <p class="text-xs font-black uppercase text-[#E30000]">Regras</p>
+        <h2 class="mt-1 text-3xl font-black text-[#0F172A]">Como funciona a pontuação</h2>
+      </div>
+
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <article class="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+          <h3 class="text-lg font-black text-[#0F172A]">Tabela GERAL</h3>
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-slate-200">
+                {% for posicao, pontos in pontos_geral %}
+                  <tr class="odd:bg-slate-50">
+                    <td class="px-4 py-3 font-black text-slate-900">{{ posicao }}º</td>
+                    <td class="px-4 py-3 text-right font-black text-[#E30000]">{{ pontos }} pontos</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="rounded-[1.5rem] border border-slate-200 bg-white p-6 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
+          <h3 class="text-lg font-black text-[#0F172A]">Tabela CATEGORIA</h3>
+          <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200">
+            <table class="w-full text-sm">
+              <tbody class="divide-y divide-slate-200">
+                {% for posicao, pontos in pontos_categoria %}
+                  <tr class="odd:bg-slate-50">
+                    <td class="px-4 py-3 font-black text-slate-900">{{ posicao }}</td>
+                    <td class="px-4 py-3 text-right font-black text-[#E30000]">{{ pontos }} ponto{% if pontos > 1 %}s{% endif %}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="rounded-[1.5rem] border border-red-200 bg-gradient-to-br from-white to-red-50 p-6 shadow-[0_18px_50px_rgba(220,38,38,0.10)]">
+          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E30000] text-white shadow-lg shadow-red-500/25">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3" />
+            </svg>
+          </div>
+          <h3 class="mt-5 text-lg font-black text-[#0F172A]">Sem pontuação duplicada</h3>
+          <p class="mt-3 text-sm font-semibold leading-relaxed text-slate-600">
+            Se um atleta já pontuou no Top 5 Geral, ele não recebe pontuação duplicada na categoria. A pontuação da categoria é repassada para o próximo colocado elegível.
+          </p>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const dropdowns = Array.from(document.querySelectorAll("[data-rankinkg-dropdown]"));
+
+    function closeDropdown(dropdown) {
+      const menu = dropdown.querySelector("[data-rankinkg-menu]");
+      const arrow = dropdown.querySelector("[data-rankinkg-arrow]");
+
+      menu.classList.add("hidden");
+      arrow.classList.remove("rotate-180");
+    }
+
+    dropdowns.forEach(function (dropdown) {
+      const button = dropdown.querySelector("[data-rankinkg-button]");
+      const menu = dropdown.querySelector("[data-rankinkg-menu]");
+      const input = dropdown.querySelector("[data-rankinkg-input]");
+      const label = dropdown.querySelector("[data-rankinkg-label]");
+      const arrow = dropdown.querySelector("[data-rankinkg-arrow]");
+
+      button.addEventListener("click", function (event) {
+        event.stopPropagation();
+
+        dropdowns.forEach(function (otherDropdown) {
+          if (otherDropdown !== dropdown) closeDropdown(otherDropdown);
+        });
+
+        menu.classList.toggle("hidden");
+        arrow.classList.toggle("rotate-180");
+      });
+
+      menu.querySelectorAll("button[data-value]").forEach(function (option) {
+        option.addEventListener("click", function () {
+          input.value = option.dataset.value;
+          label.textContent = option.textContent.trim();
+
+          menu.querySelectorAll("button[data-value]").forEach(function (item) {
+            item.classList.remove("bg-red-50", "text-[#E30000]");
+          });
+          option.classList.add("bg-red-50", "text-[#E30000]");
+          closeDropdown(dropdown);
+        });
+      });
+    });
+
+    document.addEventListener("click", function () {
+      dropdowns.forEach(closeDropdown);
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") dropdowns.forEach(closeDropdown);
+    });
+  });
+</script>
+{% endblock content %}
