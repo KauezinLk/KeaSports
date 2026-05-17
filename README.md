@@ -203,4 +203,4 @@ npm run dev:css
 
 Kaue Bueno de Freitas  
 LinkedIn: https://www.linkedin.com/in/kaue-bueno-0b3171347  
-GitHub: https://github.com/KauezinLk/KeaSports
+GitHub: https://github.com/KaueBueno-Dev/KeaSports
