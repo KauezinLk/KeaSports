@@ -1,19 +1,183 @@
-{% extends 'eventos/auth/auth_base.html' %} {% block content %}
+{% extends 'eventos/auth/auth_base.html' %}
 
-<div
-  class="min-h-screen flex items-center justify-center bg-gray-50 px-4 sm:px-6 lg:px-8"
->
-  <div class="w-full max-w-md space-y-8 bg-white p-8 rounded-xl shadow-md">
-    <h1 class="text-2xl font-bold text-center text-gray-900">Login</h1>
+{% block title %}Login | Kea Sports{% endblock %}
 
-    <form method="POST" class="mt-8 space-y-6">
+{% block content %}
+<style>
+  .login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    padding: 2.5rem 1rem;
+    box-sizing: border-box;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 32rem;
+    box-sizing: border-box;
+    border: 1px solid #f3f4f6;
+    border-radius: 1.25rem;
+    background: #ffffff;
+    padding: 2rem;
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.14);
+  }
+
+  .login-header {
+    text-align: center;
+  }
+
+  .login-title {
+    margin: 0;
+    color: #0f172a;
+    font-size: 2rem;
+    line-height: 1.1;
+    font-weight: 800;
+  }
+
+  .login-subtitle {
+    margin: 0.625rem 0 0;
+    color: #64748b;
+    font-size: 0.925rem;
+    font-weight: 500;
+  }
+
+  .login-form {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .login-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .login-input {
+    width: 100%;
+    height: 3.5rem;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 0.875rem;
+    background: #ffffff;
+    padding: 0 1rem;
+    color: #334155;
+    font-size: 0.95rem;
+    font-weight: 600;
+    outline: none;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .login-input:focus {
+    border-color: #dc2626;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12);
+  }
+
+  .login-error {
+    margin-top: 1.5rem;
+    border: 1px solid #fecaca;
+    border-radius: 1rem;
+    background: #fef2f2;
+    padding: 0.875rem 1rem;
+    color: #b91c1c;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .login-submit {
+    width: 100%;
+    height: 3rem;
+    border: 0;
+    border-radius: 0.875rem;
+    background: #dc2626;
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.25);
+    transition: background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .login-submit:hover {
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: 0 16px 30px rgba(220, 38, 38, 0.28);
+  }
+
+  .login-separator {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1.75rem 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .login-separator::before,
+  .login-separator::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: #e5e7eb;
+  }
+
+  .login-secondary {
+    display: flex;
+    width: 100%;
+    height: 3rem;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 0.875rem;
+    background: #ffffff;
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: background 160ms ease, border-color 160ms ease;
+  }
+
+  .login-secondary:hover {
+    border-color: #fecaca;
+    background: #fef2f2;
+  }
+
+  @media (max-width: 640px) {
+    .login-card {
+      padding: 1.5rem;
+      border-radius: 1rem;
+    }
+  }
+</style>
+
+<main class="login-page">
+  <section class="login-card">
+    <div class="login-header">
+      <h1 class="login-title">Login</h1>
+      <p class="login-subtitle">Entre com seus dados para acessar sua conta</p>
+    </div>
+
+    {% if erro %}
+    <div class="login-error">
+      {{ erro }}
+    </div>
+    {% endif %}
+
+    <form method="POST" class="login-form">
       {% csrf_token %}
 
       <div>
-        <label for="cpf" class="block text-sm font-medium text-gray-700">
-          CPF
-        </label>
-
+        <label for="cpf" class="login-label">CPF</label>
         <input
           type="text"
           name="cpf"
@@ -22,60 +186,44 @@
           placeholder="000.000.000-00"
           oninput="formatarCPF(this)"
           required
-          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+          class="login-input"
         />
-    
+      </div>
 
       <div>
-        <label for="password" class="block text-sm font-medium text-gray-700">
-          Senha
-        </label>
-
+        <label for="password" class="login-label">Senha</label>
         <input
           type="password"
           name="password"
           id="password"
+          placeholder="Digite sua senha"
           required
-          class="mt-1 block w-full py-4 px-4 rounded-md border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm"
+          class="login-input"
         />
       </div>
 
-      <div class="pt-2">
-        <button
-          type="submit"
-          class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-[#E30000] hover:bg-[#c90000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Entrar
-        </button>
-      </div>
-
-      <p class="mt-2 text-sm text-gray-600">
-        Não tem uma conta?
-        <a
-          href="{% url 'register' %}"
-          class="text-amber-500 hover:text-amber-600"
-        >
-          Crie sua conta KEA SPORTS
-        </a>
-      </p>
+      <button type="submit" class="login-submit">
+        Entrar
+      </button>
     </form>
 
-    {% if erro %}
-    <p class="text-red-500 mt-4">{{ erro }}</p>
-    {% endif %}
-  </div>
-</div>
+    <div class="login-separator">
+      Não tem uma conta?
+    </div>
+
+    <a href="{% url 'register' %}" class="login-secondary">
+      Criar conta KEA SPORTS
+    </a>
+  </section>
+</main>
 
 <script>
   function formatarCPF(campo) {
     let cpf = campo.value.replace(/\D/g, "");
-
     cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
     cpf = cpf.replace(/(\d{3})(\d)/, "$1.$2");
     cpf = cpf.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-
     campo.value = cpf;
   }
 </script>
-
 {% endblock %}
