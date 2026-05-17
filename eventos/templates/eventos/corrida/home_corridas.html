@@ -94,6 +94,25 @@
               </svg>
               {{ corrida.data }}
             </p>
+
+            {% if corrida.local_evento %}
+            <p class="text-base text-gray-600 flex items-center gap-2 mt-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="w-5 h-5 text-[#E30000]"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 20.5h15" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 20.5V9l6-4 6 4v11.5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 20.5V14h5v6.5" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 10.5h.01M12 10.5h.01M15 10.5h.01" />
+              </svg>
+              {{ corrida.local_evento }}
+            </p>
+            {% endif %}
           </div>
 
           <a

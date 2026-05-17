@@ -87,6 +87,12 @@ class Corrida(models.Model):
 
     nome = models.CharField(max_length=100)
     local = models.CharField(max_length=100)
+    local_evento = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name="Local do evento",
+    )
     data = models.DateField(db_index=True)
     imagem = models.ImageField(
         upload_to='corridas/',

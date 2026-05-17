@@ -23,8 +23,8 @@ class InscricaoInline(admin.TabularInline):
 
 @admin.register(Corrida)
 class CorridaAdmin(admin.ModelAdmin):
-    list_display = ('nome', 'data', 'local', 'imagem')
-    search_fields = ('nome', 'local')
+    list_display = ('nome', 'data', 'local', 'local_evento', 'imagem')
+    search_fields = ('nome', 'local', 'local_evento')
     inlines = [InscricaoInline]
 
 
